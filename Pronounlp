@@ -1,0 +1,163 @@
+'use client';
+import { useState } from 'react';
+
+export default function Home() {
+  const [form, setForm] = useState({
+    ciudad: 'La Plata',
+    fecha: '',
+    tmin: '',
+    tmax: '',
+    cielo: { mañana: '', tarde: '', noche: '' },
+    lluvia: false,
+    viento: '',
+  });
+
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+
+    if (name.includes('cielo.')) {
+      const parte = name.split('.')[1];
+      setForm((prev) => ({
+        ...prev,
+        cielo: { ...prev.cielo, [parte]: value },
+      }));
+    } else if (type === 'checkbox') {
+      setForm((prev) => ({ ...prev, [name]: checked }));
+    } else {
+      setForm((prev) => ({ ...prev, [name]: value }));
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    console.log('Pronóstico enviado:', form);
+
+    // 📌 Acá se puede conectar a Google Sheets o guardar en otro lugar
+    alert('Pronóstico cargado (simulado)');
+  };
+
+  return (
+    <div className="min-h-screen bg-blue-50 flex items-center justify-center p-4">
+      <form
+        onSubmit={handleSubmit}
+        className="bg-white shadow-md rounded-xl p-6 w-full max-w-xl space-y-4"
+      >
+        <h1 className="text-2xl font-bold text-center text-blue-700">
+          Ingreso de Pronóstico
+        </h1>
+
+        <div className="grid grid-cols-2 gap-4">
+          <label className="col-span-2">
+            Ciudad:
+            <select
+              name="ciudad"
+              value={form.ciudad}
+              onChange={handleChange}
+              className="w-full mt-1 border rounded p-2"
+            >
+              <option>La Plata</option>
+              <option>Mar del Plata</option>
+              <option>Junín</option>
+            </select>
+          </label>
+
+          <label>
+            Fecha:
+            <input
+              type="date"
+              name="fecha"
+              value={form.fecha}
+              onChange={handleChange}
+              className="w-full mt-1 border rounded p-2"
+            />
+          </label>
+
+          <label>
+            Temp. Mín:
+            <input
+              type="number"
+              name="tmin"
+              value={form.tmin}
+              onChange={handleChange}
+              className="w-full mt-1 border rounded p-2"
+            />
+          </label>
+
+          <label>
+            Temp. Máx:
+            <input
+              type="number"
+              name="tmax"
+              value={form.tmax}
+              onChange={handleChange}
+              className="w-full mt-1 border rounded p-2"
+            />
+          </label>
+
+          <label>
+            Cielo Mañana:
+            <input
+              type="text"
+              name="cielo.mañana"
+              value={form.cielo.mañana}
+              onChange={handleChange}
+              className="w-full mt-1 border rounded p-2"
+              placeholder="Ej: Parcialmente nublado"
+            />
+          </label>
+
+          <label>
+            Cielo Tarde:
+            <input
+              type="text"
+              name="cielo.tarde"
+              value={form.cielo.tarde}
+              onChange={handleChange}
+              className="w-full mt-1 border rounded p-2"
+            />
+          </label>
+
+          <label>
+            Cielo Noche:
+            <input
+              type="text"
+              name="cielo.noche"
+              value={form.cielo.noche}
+              onChange={handleChange}
+              className="w-full mt-1 border rounded p-2"
+            />
+          </label>
+
+          <label>
+            Viento:
+            <input
+              type="text"
+              name="viento"
+              value={form.viento}
+              onChange={handleChange}
+              className="w-full mt-1 border rounded p-2"
+              placeholder="Ej: Leve del Oeste"
+            />
+          </label>
+
+          <label className="col-span-2 flex items-center gap-2 mt-2">
+            <input
+              type="checkbox"
+              name="lluvia"
+              checked={form.lluvia}
+              onChange={handleChange}
+            />
+            ¿Hay lluvia?
+          </label>
+        </div>
+
+        <button
+          type="submit"
+          className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
+        >
+          Guardar Pronóstico
+        </button>
+      </form>
+    </div>
+  );
+}
