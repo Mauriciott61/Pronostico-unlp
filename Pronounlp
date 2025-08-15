@@ -1,163 +1,668 @@
-'use client';
-import { useState } from 'react';
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pronóstico Meteorológico - La Plata</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #e0e0e0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            margin: 0;
+        }
+        .container {
+            width: 800px;
+            background-color: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .header-main {
+            background-color: #0d47a1;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+        .header-sub {
+            background-color: #1e88e5;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            font-size: 1.1em;
+        }
+        .header-sub .logo-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .header-sub .logo-info img {
+            height: 40px;
+        }
+        .header-sub .logo-info .text {
+            font-size: 0.6em;
+            text-align: left;
+            line-height: 1.2;
+        }
+        .header-sub .center-text {
+            flex-grow: 1;
+            text-align: center;
+            font-size: 2em;
+            font-weight: bold;
+        }
+        .header-sub .right-logo-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .header-sub .right-logo-info .text {
+            font-size: 0.6em;
+            text-align: right;
+            line-height: 1.2;
+        }
 
-export default function Home() {
-  const [form, setForm] = useState({
-    ciudad: 'La Plata',
-    fecha: '',
-    tmin: '',
-    tmax: '',
-    cielo: { mañana: '', tarde: '', noche: '' },
-    lluvia: false,
-    viento: '',
-  });
+        /* Estilos de las pestañas de ciudades */
+        .city-tabs {
+            display: flex;
+            justify-content: center;
+            background-color: #f0f0f0;
+            border-bottom: 2px solid #ccc;
+            padding: 0;
+            margin: 0;
+        }
+        .city-tab {
+            padding: 15px 30px;
+            cursor: pointer;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #555;
+            border: none;
+            background-color: transparent;
+            transition: background-color 0.3s;
+        }
+        .city-tab:hover {
+            background-color: #e0e0e0;
+        }
+        .city-tab.active {
+            background-color: #fff;
+            color: #0d47a1;
+            border-bottom: 2px solid #0d47a1;
+        }
+        
+        /* Botón de descarga */
+        .download-btn-container {
+            text-align: center;
+            padding: 10px;
+            background-color: #e0e0e0;
+        }
+        #download-btn {
+            background-color: #2e7d32;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 1em;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        #download-btn:hover {
+            background-color: #388e3c;
+        }
 
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
+        /* Estilos para el formato de tabla */
+        .grid-day-section { padding: 20px; }
+        .grid-day-header {
+            background-color: #1565c0;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 10px 10px 0 0;
+            display: flex;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+        .grid-day-header .label { width: 150px; padding-left: 20px; }
+        .grid-day-header .time-of-day { flex: 1; text-align: center; }
+        .grid-forecast-grid { display: flex; flex-direction: column; }
+        .grid-forecast-row {
+            display: flex;
+            background-color: #e3f2fd;
+            border-bottom: 1px solid #ccc;
+        }
+        .grid-forecast-row:last-of-type { border-bottom: none; }
+        .grid-forecast-label {
+            width: 150px;
+            padding: 10px 20px;
+            font-weight: bold;
+            color: #333;
+            display: flex;
+            align-items: center;
+        }
+        .grid-forecast-item {
+            flex: 1;
+            text-align: center;
+            padding: 10px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .grid-forecast-temp { font-size: 1.5em; font-weight: bold; }
+        .grid-forecast-icon { font-size: 4em; }
+        .grid-temp-min-max {
+            width: 150px;
+            padding: 10px 20px;
+            text-align: left;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            font-size: 0.9em;
+        }
+        .grid-temp-min-max .min-temp, .grid-temp-min-max .max-temp { display: flex; gap: 5px; align-items: center; }
+        .grid-temp-min-max .min-temp::before { content: 'Min:'; color: #0077c2; }
+        .grid-temp-min-max .max-temp::before { content: 'Max:'; color: #d32f2f; }
+        .grid-temp-min-max span { font-weight: bold; }
+        .grid-temp-min-max .blue-text { color: #0077c2; }
+        .grid-temp-min-max .red-text { color: #d32f2f; }
+        .grid-day-section.sabado .grid-day-header { background-color: #00796b; }
+        .grid-day-section.sabado .grid-forecast-row { background-color: #e0f2f1; }
+        .grid-day-section.sabado .grid-forecast-label { color: #004d40; }
+        .grid-day-section.sabado .grid-temp-min-max .min-temp::before { color: #00796b; }
+        .grid-day-section.sabado .grid-temp-min-max .max-temp::before { color: #d32f2f; }
 
-    if (name.includes('cielo.')) {
-      const parte = name.split('.')[1];
-      setForm((prev) => ({
-        ...prev,
-        cielo: { ...prev.cielo, [parte]: value },
-      }));
-    } else if (type === 'checkbox') {
-      setForm((prev) => ({ ...prev, [name]: checked }));
-    } else {
-      setForm((prev) => ({ ...prev, [name]: value }));
-    }
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    console.log('Pronóstico enviado:', form);
-
-    // 📌 Acá se puede conectar a Google Sheets o guardar en otro lugar
-    alert('Pronóstico cargado (simulado)');
-  };
-
-  return (
-    <div className="min-h-screen bg-blue-50 flex items-center justify-center p-4">
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white shadow-md rounded-xl p-6 w-full max-w-xl space-y-4"
-      >
-        <h1 className="text-2xl font-bold text-center text-blue-700">
-          Ingreso de Pronóstico
-        </h1>
-
-        <div className="grid grid-cols-2 gap-4">
-          <label className="col-span-2">
-            Ciudad:
-            <select
-              name="ciudad"
-              value={form.ciudad}
-              onChange={handleChange}
-              className="w-full mt-1 border rounded p-2"
-            >
-              <option>La Plata</option>
-              <option>Mar del Plata</option>
-              <option>Junín</option>
-            </select>
-          </label>
-
-          <label>
-            Fecha:
-            <input
-              type="date"
-              name="fecha"
-              value={form.fecha}
-              onChange={handleChange}
-              className="w-full mt-1 border rounded p-2"
-            />
-          </label>
-
-          <label>
-            Temp. Mín:
-            <input
-              type="number"
-              name="tmin"
-              value={form.tmin}
-              onChange={handleChange}
-              className="w-full mt-1 border rounded p-2"
-            />
-          </label>
-
-          <label>
-            Temp. Máx:
-            <input
-              type="number"
-              name="tmax"
-              value={form.tmax}
-              onChange={handleChange}
-              className="w-full mt-1 border rounded p-2"
-            />
-          </label>
-
-          <label>
-            Cielo Mañana:
-            <input
-              type="text"
-              name="cielo.mañana"
-              value={form.cielo.mañana}
-              onChange={handleChange}
-              className="w-full mt-1 border rounded p-2"
-              placeholder="Ej: Parcialmente nublado"
-            />
-          </label>
-
-          <label>
-            Cielo Tarde:
-            <input
-              type="text"
-              name="cielo.tarde"
-              value={form.cielo.tarde}
-              onChange={handleChange}
-              className="w-full mt-1 border rounded p-2"
-            />
-          </label>
-
-          <label>
-            Cielo Noche:
-            <input
-              type="text"
-              name="cielo.noche"
-              value={form.cielo.noche}
-              onChange={handleChange}
-              className="w-full mt-1 border rounded p-2"
-            />
-          </label>
-
-          <label>
-            Viento:
-            <input
-              type="text"
-              name="viento"
-              value={form.viento}
-              onChange={handleChange}
-              className="w-full mt-1 border rounded p-2"
-              placeholder="Ej: Leve del Oeste"
-            />
-          </label>
-
-          <label className="col-span-2 flex items-center gap-2 mt-2">
-            <input
-              type="checkbox"
-              name="lluvia"
-              checked={form.lluvia}
-              onChange={handleChange}
-            />
-            ¿Hay lluvia?
-          </label>
+        /* Estilos para el formato de tarjeta */
+        .card-forecast-container {
+            display: flex;
+            justify-content: space-around;
+            padding: 20px;
+            gap: 20px;
+        }
+        .weather-card {
+            flex: 1;
+            background-color: #64b5f6;
+            color: white;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .weather-card.dark-blue { background-color: #42a5f5; }
+        .day-info { font-size: 1.5em; font-weight: bold; }
+        .date-info { font-size: 1em; }
+        .weather-icons-temps {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+        }
+        .day-weather, .night-weather {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .temp-min-max-icon { display: flex; align-items: center; gap: 5px; font-size: 1em; font-weight: normal; }
+        .temp-min-max-icon .temp-bar { font-size: 1.5em; }
+        .sky-condition, .wind-info { font-size: 1.2em; }
+        .arrow-down { font-size: 2em; }
+        .footnote {
+            text-align: center;
+            padding: 10px;
+            font-size: 0.9em;
+            color: #555;
+            background-color: #f0f0f0;
+        }
+        
+        /* Ocultar el contenido de los pronósticos */
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="content-to-capture">
+        <div class="header-main">PRONÓSTICO METEOROLÓGICO</div>
+        <div class="header-sub">
+            <div class="logo-info">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Facultad_de_Ciencias_Astron%C3%B3micas_y_Geof%C3%ADsicas.svg/1200px-Facultad_de_Ciencias_Astron%C3%B3micas_y_Geof%C3%ADsicas.svg.png" alt="Logo">
+                <div class="text">Facultad de Ciencias<br>Astronómicas<br>Geofísicas</div>
+            </div>
+            <div class="center-text" id="city-title">LA PLATA</div>
+            <div class="right-logo-info">
+                <div class="text">UNIVERSIDAD<br>NACIONAL<br>DE LA PLATA</div>
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/cf/UNLP_Logo_2016.svg/1200px-UNLP_Logo_2016.svg.png" alt="Logo UNLP">
+            </div>
+        </div>
+        <div class="header-info-bar">
+            <span>15/AGO/25</span>
+            <span>Hora de emisión 11:00hs</span>
         </div>
 
-        <button
-          type="submit"
-          className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
-        >
-          Guardar Pronóstico
-        </button>
-      </form>
+        <div class="city-tabs">
+            <button class="city-tab active" data-city="la-plata">LA PLATA</button>
+            <button class="city-tab" data-city="mar-del-plata">MAR DEL PLATA</button>
+            <button class="city-tab" data-city="junin">JUNÍN</button>
+        </div>
+        <div class="download-btn-container">
+            <button id="download-btn">Descargar PNG</button>
+        </div>
+
+        <div id="la-plata" class="tab-content active">
+            <div class="grid-day-section">
+                <div class="grid-day-header">
+                    <div class="label">VIERNES</div>
+                    <span class="time-of-day">MAÑANA</span>
+                    <span class="time-of-day">TARDE</span>
+                    <span class="time-of-day">NOCHE</span>
+                </div>
+                <div class="grid-forecast-grid">
+                    <div class="grid-forecast-row">
+                        <div class="grid-temp-min-max">
+                            <div class="max-temp"><span class="red-text">15°c</span></div>
+                            <div class="min-temp"><span class="blue-text">8°c</span></div>
+                        </div>
+                        <div class="grid-forecast-item">
+                            <div class="grid-forecast-icon">☀️☁️</div>
+                            <div class="grid-forecast-temp">10°c</div>
+                        </div>
+                        <div class="grid-forecast-item">
+                            <div class="grid-forecast-icon">☁️</div>
+                            <div class="grid-forecast-temp">15°c</div>
+                        </div>
+                        <div class="grid-forecast-item">
+                            <div class="grid-forecast-icon">🌙☁️</div>
+                            <div class="grid-forecast-temp">11°c</div>
+                        </div>
+                    </div>
+                    <div class="grid-forecast-row">
+                        <div class="grid-forecast-label">Vientos</div>
+                        <div class="grid-forecast-item">Leves del norte</div>
+                        <div class="grid-forecast-item">Leves del sur</div>
+                        <div class="grid-forecast-item">Leves del sur</div>
+                    </div>
+                    <div class="grid-forecast-row">
+                        <div class="grid-forecast-label">Tiempo</div>
+                        <div class="grid-forecast-item">Parcialmente nublado</div>
+                        <div class="grid-forecast-item">Nublado</div>
+                        <div class="grid-forecast-item">Algo nublado</div>
+                    </div>
+                </div>
+            </div>
+            <div class="grid-day-section sabado">
+                <div class="grid-day-header">
+                    <div class="label">SÁBADO</div>
+                    <span class="time-of-day">MAÑANA</span>
+                    <span class="time-of-day">TARDE</span>
+                    <span class="time-of-day">NOCHE</span>
+                </div>
+                <div class="grid-forecast-grid">
+                    <div class="grid-forecast-row">
+                        <div class="grid-temp-min-max">
+                            <div class="max-temp"><span class="red-text">17°c</span></div>
+                            <div class="min-temp"><span class="blue-text">9°c</span></div>
+                        </div>
+                        <div class="grid-forecast-item">
+                            <div class="grid-forecast-icon">☀️</div>
+                            <div class="grid-forecast-temp">12°c</div>
+                        </div>
+                        <div class="grid-forecast-item">
+                            <div class="grid-forecast-icon">☀️☁️</div>
+                            <div class="grid-forecast-temp">17°c</div>
+                        </div>
+                        <div class="grid-forecast-item">
+                            <div class="grid-forecast-icon">🌙⭐</div>
+                            <div class="grid-forecast-temp">14°c</div>
+                        </div>
+                    </div>
+                    <div class="grid-forecast-row">
+                        <div class="grid-forecast-label">Vientos</div>
+                        <div class="grid-forecast-item">Leves del sudeste</div>
+                        <div class="grid-forecast-item">Leves del este</div>
+                        <div class="grid-forecast-item">Leves del este</div>
+                    </div>
+                    <div class="grid-forecast-row">
+                        <div class="grid-forecast-label">Tiempo</div>
+                        <div class="grid-forecast-item">Algo nublado</div>
+                        <div class="grid-forecast-item">Algo nublado</div>
+                        <div class="grid-forecast-item">Despejado</div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-forecast-container">
+                <div class="weather-card">
+                    <div class="day-info">DOMINGO</div>
+                    <div class="date-info">17/AGO/25</div>
+                    <div class="weather-icons-temps">
+                        <div class="day-weather">
+                            <span style="font-size: 4em;">☀️</span>
+                            <div class="temp-min-max-icon"><span class="temp-bar">🌡️</span> <span>18°c</span></div>
+                        </div>
+                        <div class="night-weather">
+                            <span style="font-size: 4em;">🌙</span>
+                            <div class="temp-min-max-icon"><span class="temp-bar">🌡️</span> <span>10°c</span></div>
+                        </div>
+                    </div>
+                    <div class="sky-condition">Cielo despejado</div>
+                    <div class="arrow-down">⬇️</div>
+                    <div class="wind-info">Vientos leves del norte</div>
+                </div>
+                <div class="weather-card dark-blue">
+                    <div class="day-info">LUNES</div>
+                    <div class="date-info">18/AGO/25</div>
+                    <div class="weather-icons-temps">
+                        <div class="day-weather">
+                            <span style="font-size: 4em;">☀️☁️</span>
+                            <div class="temp-min-max-icon"><span class="temp-bar">🌡️</span> <span>19°c</span></div>
+                        </div>
+                        <div class="night-weather">
+                            <span style="font-size: 4em;">🌙☁️</span>
+                            <div class="temp-min-max-icon"><span class="temp-bar">🌡️</span> <span>13°c</span></div>
+                        </div>
+                    </div>
+                    <div class="sky-condition">Cielo parcialmente nublado</div>
+                    <div class="arrow-down">⬇️</div>
+                    <div class="wind-info">Vientos leves del oeste</div>
+                </div>
+            </div>
+            <div class="footnote">
+                * TEMPERATURA EN ZONA SUBURBANA
+            </div>
+        </div>
+
+        <div id="mar-del-plata" class="tab-content">
+            <h3 style="text-align: center; margin-top: 20px;">Pronóstico para Mar del Plata</h3>
+            <div class="grid-day-section">
+                <div class="grid-day-header">
+                    <div class="label">VIERNES</div>
+                    <span class="time-of-day">MAÑANA</span>
+                    <span class="time-of-day">TARDE</span>
+                    <span class="time-of-day">NOCHE</span>
+                </div>
+                <div class="grid-forecast-grid">
+                    <div class="grid-forecast-row">
+                        <div class="grid-temp-min-max">
+                            <div class="max-temp"><span class="red-text">12°c</span></div>
+                            <div class="min-temp"><span class="blue-text">5°c</span></div>
+                        </div>
+                        <div class="grid-forecast-item">
+                            <div class="grid-forecast-icon">💨☁️</div>
+                            <div class="grid-forecast-temp">8°c</div>
+                        </div>
+                        <div class="grid-forecast-item">
+                            <div class="grid-forecast-icon">☁️</div>
+                            <div class="grid-forecast-temp">12°c</div>
+                        </div>
+                        <div class="grid-forecast-item">
+                            <div class="grid-forecast-icon">🌙☁️</div>
+                            <div class="grid-forecast-temp">9°c</div>
+                        </div>
+                    </div>
+                    <div class="grid-forecast-row">
+                        <div class="grid-forecast-label">Vientos</div>
+                        <div class="grid-forecast-item">Fuertes del sudeste</div>
+                        <div class="grid-forecast-item">Moderados del sur</div>
+                        <div class="grid-forecast-item">Moderados del sur</div>
+                    </div>
+                    <div class="grid-forecast-row">
+                        <div class="grid-forecast-label">Tiempo</div>
+                        <div class="grid-forecast-item">Cubierto</div>
+                        <div class="grid-forecast-item">Nublado</div>
+                        <div class="grid-forecast-item">Parcialmente nublado</div>
+                    </div>
+                </div>
+            </div>
+            <div class="grid-day-section sabado">
+                <div class="grid-day-header">
+                    <div class="label">SÁBADO</div>
+                    <span class="time-of-day">MAÑANA</span>
+                    <span class="time-of-day">TARDE</span>
+                    <span class="time-of-day">NOCHE</span>
+                </div>
+                <div class="grid-forecast-grid">
+                    <div class="grid-forecast-row">
+                        <div class="grid-temp-min-max">
+                            <div class="max-temp"><span class="red-text">15°c</span></div>
+                            <div class="min-temp"><span class="blue-text">7°c</span></div>
+                        </div>
+                        <div class="grid-forecast-item">
+                            <div class="grid-forecast-icon">☀️☁️</div>
+                            <div class="grid-forecast-temp">9°c</div>
+                        </div>
+                        <div class="grid-forecast-item">
+                            <div class="grid-forecast-icon">☀️</div>
+                            <div class="grid-forecast-temp">15°c</div>
+                        </div>
+                        <div class="grid-forecast-item">
+                            <div class="grid-forecast-icon">🌙⭐</div>
+                            <div class="grid-forecast-temp">12°c</div>
+                        </div>
+                    </div>
+                    <div class="grid-forecast-row">
+                        <div class="grid-forecast-label">Vientos</div>
+                        <div class="grid-forecast-item">Leves del oeste</div>
+                        <div class="grid-forecast-item">Leves del noroeste</div>
+                        <div class="grid-forecast-item">Leves del norte</div>
+                    </div>
+                    <div class="grid-forecast-row">
+                        <div class="grid-forecast-label">Tiempo</div>
+                        <div class="grid-forecast-item">Algo nublado</div>
+                        <div class="grid-forecast-item">Despejado</div>
+                        <div class="grid-forecast-item">Despejado</div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-forecast-container">
+                <div class="weather-card">
+                    <div class="day-info">DOMINGO</div>
+                    <div class="date-info">17/AGO/25</div>
+                    <div class="weather-icons-temps">
+                        <div class="day-weather"><span style="font-size: 4em;">☀️</span>
+                            <div class="temp-min-max-icon"><span class="temp-bar">🌡️</span> <span>16°c</span></div>
+                        </div>
+                        <div class="night-weather"><span style="font-size: 4em;">🌙☁️</span>
+                            <div class="temp-min-max-icon"><span class="temp-bar">🌡️</span> <span>9°c</span></div>
+                        </div>
+                    </div>
+                    <div class="sky-condition">Cielo despejado</div>
+                    <div class="arrow-down">⬇️</div>
+                    <div class="wind-info">Vientos moderados del norte</div>
+                </div>
+                <div class="weather-card dark-blue">
+                    <div class="day-info">LUNES</div>
+                    <div class="date-info">18/AGO/25</div>
+                    <div class="weather-icons-temps">
+                        <div class="day-weather"><span style="font-size: 4em;">☁️</span>
+                            <div class="temp-min-max-icon"><span class="temp-bar">🌡️</span> <span>18°c</span></div>
+                        </div>
+                        <div class="night-weather"><span style="font-size: 4em;">🌙☁️</span>
+                            <div class="temp-min-max-icon"><span class="temp-bar">🌡️</span> <span>11°c</span></div>
+                        </div>
+                    </div>
+                    <div class="sky-condition">Cielo nublado</div>
+                    <div class="arrow-down">⬇️</div>
+                    <div class="wind-info">Vientos fuertes del sur</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="junin" class="tab-content">
+            <h3 style="text-align: center; margin-top: 20px;">Pronóstico para Junín</h3>
+            <div class="grid-day-section">
+                <div class="grid-day-header">
+                    <div class="label">VIERNES</div>
+                    <span class="time-of-day">MAÑANA</span>
+                    <span class="time-of-day">TARDE</span>
+                    <span class="time-of-day">NOCHE</span>
+                </div>
+                <div class="grid-forecast-grid">
+                    <div class="grid-forecast-row">
+                        <div class="grid-temp-min-max">
+                            <div class="max-temp"><span class="red-text">18°c</span></div>
+                            <div class="min-temp"><span class="blue-text">11°c</span></div>
+                        </div>
+                        <div class="grid-forecast-item">
+                            <div class="grid-forecast-icon">☁️</div>
+                            <div class="grid-forecast-temp">13°c</div>
+                        </div>
+                        <div class="grid-forecast-item">
+                            <div class="grid-forecast-icon">☀️</div>
+                            <div class="grid-forecast-temp">18°c</div>
+                        </div>
+                        <div class="grid-forecast-item">
+                            <div class="grid-forecast-icon">🌙⭐</div>
+                            <div class="grid-forecast-temp">15°c</div>
+                        </div>
+                    </div>
+                    <div class="grid-forecast-row">
+                        <div class="grid-forecast-label">Vientos</div>
+                        <div class="grid-forecast-item">Leves del oeste</div>
+                        <div class="grid-forecast-item">Leves del norte</div>
+                        <div class="grid-forecast-item">Leves del norte</div>
+                    </div>
+                    <div class="grid-forecast-row">
+                        <div class="grid-forecast-label">Tiempo</div>
+                        <div class="grid-forecast-item">Nublado</div>
+                        <div class="grid-forecast-item">Despejado</div>
+                        <div class="grid-forecast-item">Despejado</div>
+                    </div>
+                </div>
+            </div>
+            <div class="grid-day-section sabado">
+                <div class="grid-day-header">
+                    <div class="label">SÁBADO</div>
+                    <span class="time-of-day">MAÑANA</span>
+                    <span class="time-of-day">TARDE</span>
+                    <span class="time-of-day">NOCHE</span>
+                </div>
+                <div class="grid-forecast-grid">
+                    <div class="grid-forecast-row">
+                        <div class="grid-temp-min-max">
+                            <div class="max-temp"><span class="red-text">20°c</span></div>
+                            <div class="min-temp"><span class="blue-text">12°c</span></div>
+                        </div>
+                        <div class="grid-forecast-item">
+                            <div class="grid-forecast-icon">☀️</div>
+                            <div class="grid-forecast-temp">15°c</div>
+                        </div>
+                        <div class="grid-forecast-item">
+                            <div class="grid-forecast-icon">☀️☁️</div>
+                            <div class="grid-forecast-temp">20°c</div>
+                        </div>
+                        <div class="grid-forecast-item">
+                            <div class="grid-forecast-icon">🌙☁️</div>
+                            <div class="grid-forecast-temp">17°c</div>
+                        </div>
+                    </div>
+                    <div class="grid-forecast-row">
+                        <div class="grid-forecast-label">Vientos</div>
+                        <div class="grid-forecast-item">Leves del oeste</div>
+                        <div class="grid-forecast-item">Leves del norte</div>
+                        <div class="grid-forecast-item">Leves del norte</div>
+                    </div>
+                    <div class="grid-forecast-row">
+                        <div class="grid-forecast-label">Tiempo</div>
+                        <div class="grid-forecast-item">Despejado</div>
+                        <div class="grid-forecast-item">Parcialmente nublado</div>
+                        <div class="grid-forecast-item">Algo nublado</div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-forecast-container">
+                <div class="weather-card">
+                    <div class="day-info">DOMINGO</div>
+                    <div class="date-info">17/AGO/25</div>
+                    <div class="weather-icons-temps">
+                        <div class="day-weather"><span style="font-size: 4em;">☁️</span>
+                            <div class="temp-min-max-icon"><span class="temp-bar">🌡️</span> <span>21°c</span></div>
+                        </div>
+                        <div class="night-weather"><span style="font-size: 4em;">🌙☁️</span>
+                            <div class="temp-min-max-icon"><span class="temp-bar">🌡️</span> <span>14°c</span></div>
+                        </div>
+                    </div>
+                    <div class="sky-condition">Cielo nublado</div>
+                    <div class="arrow-down">⬇️</div>
+                    <div class="wind-info">Vientos leves del sur</div>
+                </div>
+                <div class="weather-card dark-blue">
+                    <div class="day-info">LUNES</div>
+                    <div class="date-info">18/AGO/25</div>
+                    <div class="weather-icons-temps">
+                        <div class="day-weather"><span style="font-size: 4em;">☀️☁️</span>
+                            <div class="temp-min-max-icon"><span class="temp-bar">🌡️</span> <span>19°c</span></div>
+                        </div>
+                        <div class="night-weather"><span style="font-size: 4em;">🌙☁️</span>
+                            <div class="temp-min-max-icon"><span class="temp-bar">🌡️</span> <span>12°c</span></div>
+                        </div>
+                    </div>
+                    <div class="sky-condition">Cielo parcialmente nublado</div>
+                    <div class="arrow-down">⬇️</div>
+                    <div class="wind-info">Vientos leves del sur</div>
+                </div>
+            </div>
+        </div>
     </div>
-  );
-}
+
+    <script>
+        const tabs = document.querySelectorAll('.city-tab');
+        const contents = document.querySelectorAll('.tab-content');
+        const cityTitle = document.getElementById('city-title');
+        const downloadBtn = document.getElementById('download-btn');
+        const contentToCapture = document.getElementById('content-to-capture');
+        
+        let currentCity = 'la-plata';
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                // Desactivar todas las pestañas
+                tabs.forEach(t => t.classList.remove('active'));
+                
+                // Activar la pestaña clicada
+                tab.classList.add('active');
+
+                // Ocultar todos los contenidos
+                contents.forEach(c => c.classList.remove('active'));
+
+                // Mostrar el contenido correspondiente
+                const targetId = tab.getAttribute('data-city');
+                document.getElementById(targetId).classList.add('active');
+                
+                currentCity = targetId;
+
+                // Actualizar el título de la ciudad
+                cityTitle.textContent = tab.textContent;
+            });
+        });
+
+        // Evento de clic para el botón de descarga
+        downloadBtn.addEventListener('click', () => {
+            const cityName = cityTitle.textContent.toLowerCase().replace(' ', '-');
+            const fileName = `pronostico-${cityName}.png`;
+
+            // Oculta el botón de descarga antes de capturar la imagen
+            downloadBtn.style.display = 'none';
+
+            // Captura el contenido del contenedor principal
+            html2canvas(contentToCapture).then(canvas => {
+                // Crea un enlace de descarga
+                const link = document.createElement('a');
+                link.href = canvas.toDataURL('image/png');
+                link.download = fileName;
+                link.click();
+            }).finally(() => {
+                // Vuelve a mostrar el botón de descarga una vez que se completa la captura
+                downloadBtn.style.display = 'block';
+            });
+        });
+    </script>
+</body>
+</html>
