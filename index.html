@@ -119,7 +119,7 @@
                         <option value="junin">Junín</option>
                     </select>
                 </div>
-                </form>
+            </form>
             <div class="admin-buttons">
                 <button id="save-button">Guardar Cambios</button>
             </div>
@@ -133,13 +133,13 @@
     <script>
         // *** 1. CONFIGURACIÓN DE FIREBASE (REEMPLAZA CON TU CÓDIGO) ***
         const firebaseConfig = {
-          apiKey: "AIzaSyCumkjuYFKepwDnUNb-oYGWle_OkgR_y3A",
-      authDomain: "web-pronostico.firebaseapp.com",
-      projectId: "web-pronostico",
-      storageBucket: "web-pronostico.firebasestorage.app",
-      messagingSenderId: "328619903034",
-      appId: "1:328619903034:web:cb6dabaed0226cfc754d03",
-      measurementId: "G-5RN96Y972V"
+            apiKey: "AIzaSyCumkjuYFKepwDnUNb-oYGWle_OkgR_y3A",
+            authDomain: "web-pronostico.firebaseapp.com",
+            projectId: "web-pronostico",
+            storageBucket: "web-pronostico.firebasestorage.app",
+            messagingSenderId: "328619903034",
+            appId: "1:328619903034:web:cb6dabaed0226cfc754d03",
+            measurementId: "G-5RN96Y972V"
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
@@ -222,33 +222,31 @@
             container.appendChild(cardContainer);
 
             // Obtener datos de la colección `semana`
-            if (cityData.pronostico.semana) {
-                db.collection('ciudades').doc(targetElementId).collection('semana').get().then(snapshot => {
-                    snapshot.forEach(doc => {
-                        const card = doc.data();
-                        const cardElement = document.createElement('div');
-                        cardElement.className = 'weather-card';
-                        cardElement.innerHTML = `
-                            <div class="day-info">${card.dia}</div>
-                            <div class="date-info">${card.fecha}</div>
-                            <div class="weather-icons-temps">
-                                <div class="day-weather">
-                                    <span style="font-size: 4em;">${card.dia_icono}</span>
-                                    <div class="temp-min-max-icon"><span class="temp-bar">🌡️</span> <span>${card.dia_temp}°c</span></div>
-                                </div>
-                                <div class="night-weather">
-                                    <span style="font-size: 4em;">${card.noche_icono}</span>
-                                    <div class="temp-min-max-icon"><span class="temp-bar">🌡️</span> <span>${card.noche_temp}°c</span></div>
-                                </div>
+            db.collection('ciudades').doc(targetElementId).collection('semana').get().then(snapshot => {
+                snapshot.forEach(doc => {
+                    const card = doc.data();
+                    const cardElement = document.createElement('div');
+                    cardElement.className = 'weather-card';
+                    cardElement.innerHTML = `
+                        <div class="day-info">${card.dia}</div>
+                        <div class="date-info">${card.fecha}</div>
+                        <div class="weather-icons-temps">
+                            <div class="day-weather">
+                                <span style="font-size: 4em;">${card.dia_icono}</span>
+                                <div class="temp-min-max-icon"><span class="temp-bar">🌡️</span> <span>${card.dia_temp}°c</span></div>
                             </div>
-                            <div class="sky-condition">${card.condicion_cielo}</div>
-                            <div class="arrow-down">⬇️</div>
-                            <div class="wind-info">${card.viento}</div>
-                        `;
-                        cardContainer.appendChild(cardElement);
-                    });
+                            <div class="night-weather">
+                                <span style="font-size: 4em;">${card.noche_icono}</span>
+                                <div class="temp-min-max-icon"><span class="temp-bar">🌡️</span> <span>${card.noche_temp}°c</span></div>
+                            </div>
+                        </div>
+                        <div class="sky-condition">${card.condicion_cielo}</div>
+                        <div class="arrow-down">⬇️</div>
+                        <div class="wind-info">${card.viento}</div>
+                    `;
+                    cardContainer.appendChild(cardElement);
                 });
-            }
+            });
 
             const footnote = document.createElement('div');
             footnote.className = 'footnote';
@@ -272,6 +270,7 @@
                 }
             } catch (e) {
                 console.error("Error loading document:", e);
+                alert('Error al cargar los datos. Intente de nuevo.');
             }
         }
 
@@ -334,29 +333,29 @@
                         <h4>${day.dia}</h4>
                         <div class="admin-form-group">
                             <label>Temperatura Mínima:</label>
-                            <input type="number" data-path="${dayKey}.min_temp" value="${day.min_temp}">
+                            <input type="number" data-path="pronostico.${dayKey}.min_temp" value="${day.min_temp}">
                         </div>
                         <div class="admin-form-group">
                             <label>Temperatura Máxima:</label>
-                            <input type="number" data-path="${dayKey}.max_temp" value="${day.max_temp}">
+                            <input type="number" data-path="pronostico.${dayKey}.max_temp" value="${day.max_temp}">
                         </div>
                         ${['manana', 'tarde', 'noche'].map(timeKey => `
                             <h5>${timeKey.toUpperCase()}</h5>
                             <div class="admin-form-group">
                                 <label>Ícono:</label>
-                                <input type="text" data-path="${dayKey}.${timeKey}.icon" value="${day[timeKey].icon}">
+                                <input type="text" data-path="pronostico.${dayKey}.${timeKey}.icon" value="${day[timeKey].icon}">
                             </div>
                             <div class="admin-form-group">
                                 <label>Temperatura:</label>
-                                <input type="number" data-path="${dayKey}.${timeKey}.temp" value="${day[timeKey].temp}">
+                                <input type="number" data-path="pronostico.${dayKey}.${timeKey}.temp" value="${day[timeKey].temp}">
                             </div>
                             <div class="admin-form-group">
                                 <label>Viento:</label>
-                                <input type="text" data-path="${dayKey}.${timeKey}.viento" value="${day[timeKey].viento}">
+                                <input type="text" data-path="pronostico.${dayKey}.${timeKey}.viento" value="${day[timeKey].viento}">
                             </div>
                             <div class="admin-form-group">
                                 <label>Tiempo:</label>
-                                <input type="text" data-path="${dayKey}.${timeKey}.tiempo" value="${day[timeKey].tiempo}">
+                                <input type="text" data-path="pronostico.${dayKey}.${timeKey}.tiempo" value="${day[timeKey].tiempo}">
                             </div>
                         `).join('')}
                     `;
@@ -376,7 +375,7 @@
             inputs.forEach(input => {
                 const path = input.getAttribute('data-path');
                 const value = input.type === 'number' ? parseFloat(input.value) : input.value;
-                updates[`pronostico.${path}`] = value;
+                updates[path] = value;
             });
             
             updates['emision.fecha'] = document.getElementById('admin-fecha').value;
@@ -411,8 +410,10 @@
             auth.signOut();
         });
 
-        // Cargar el pronóstico inicial al cargar la página
-        loadForecast('la-plata');
+        // *** Carga el pronóstico inicial al cargar la página (Corrección clave) ***
+        document.addEventListener('DOMContentLoaded', () => {
+            loadForecast('la-plata');
+        });
     </script>
 </body>
 </html>
