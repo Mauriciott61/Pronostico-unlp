@@ -3,89 +3,290 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pronóstico Meteorológico - La Plata</title>
+    <title>Pronóstico Meteorológico - UNLP</title>
     <style>
-        body { font-family: Arial, sans-serif; background-color: #e0e0e0; display: flex; flex-direction: column; align-items: center; padding: 20px; margin: 0; }
-        .container { width: 800px; background-color: white; border-radius: 15px; overflow: hidden; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); }
-        .header-main { background-color: #0d47a1; color: white; padding: 10px 20px; text-align: center; font-size: 1.5em; font-weight: bold; }
-        .header-sub { background-color: #1e88e5; color: white; display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; font-size: 1.1em; }
-        .header-sub .logo-info { display: flex; align-items: center; gap: 10px; }
-        .header-sub .logo-info img { height: 40px; }
-        .header-sub .logo-info .text { font-size: 0.6em; text-align: left; line-height: 1.2; }
-        .header-sub .center-text { flex-grow: 1; text-align: center; font-size: 2em; font-weight: bold; }
-        .header-sub .right-logo-info { display: flex; align-items: center; gap: 10px; }
-        .header-sub .right-logo-info .text { font-size: 0.6em; text-align: right; line-height: 1.2; }
+        /* Variables y Reset Básico */
+        :root {
+            --color-primary: #007bff; /* Azul base */
+            --color-dark-blue: #0d47a1; /* Azul oscuro (encabezado) */
+            --color-light-blue: #1e88e5; /* Azul medio (subencabezado) */
+            --color-fuchsia-bg: #447c94; /* Color de fondo general del pronóstico */
+            --color-table-header: #1565c0; /* Azul de encabezado de día (Viernes) */
+            --color-saturday-header: #00796b; /* Verde de encabezado (Sábado) */
+            --color-text-light: white;
+            --color-text-dark: #333;
+            --border-radius-lg: 15px;
+        }
 
-        /* Estilos de las pestañas de ciudades */
-        .city-tabs { display: flex; justify-content: center; background-color: #f0f0f0; border-bottom: 2px solid #ccc; padding: 0; margin: 0; }
-        .city-tab { padding: 15px 30px; cursor: pointer; font-size: 1.2em; font-weight: bold; color: #555; border: none; background-color: transparent; transition: background-color 0.3s; }
+        body { 
+            font-family: Arial, Helvetica, sans-serif; 
+            background-color: #e0e0e0; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            padding: 20px; 
+            margin: 0; 
+        }
+
+        .container { 
+            width: 800px; 
+            max-width: 100%;
+            background-color: white; 
+            border-radius: var(--border-radius-lg); 
+            overflow: hidden; 
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); 
+        }
+
+        /* --- ENCABEZADOS DE LA PÁGINA --- */
+        .header-main { 
+            background-color: var(--color-dark-blue); 
+            color: var(--color-text-light); 
+            padding: 8px 20px; 
+            text-align: center; 
+            font-size: 1.2em; 
+            font-weight: bold; 
+            border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
+        }
+
+        .header-sub { 
+            background-color: white; /* Fondo blanco */
+            color: var(--color-text-dark); 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            padding: 10px 20px; 
+        }
+
+        .header-sub .logo-info { display: flex; align-items: center; gap: 10px; font-size: 0.8em; }
+        .header-sub .logo-info img { height: 50px; }
+        .header-sub .logo-info .text { font-size: 0.8em; text-align: left; line-height: 1.2; }
+        
+        .header-sub .center-text { 
+            flex-grow: 1; 
+            text-align: center; 
+            font-size: 2.8em; /* Tamaño grande para el nombre de la ciudad */
+            font-weight: 800; /* Extra bold */
+            color: var(--color-dark-blue);
+            text-transform: uppercase;
+        }
+
+        .header-sub .right-logo-info { display: flex; align-items: center; gap: 10px; font-size: 0.8em; }
+        .header-sub .right-logo-info .text { font-size: 0.8em; text-align: right; line-height: 1.2; }
+        .header-sub .right-logo-info img { height: 50px; }
+
+
+        /* --- BARRA DE FECHA Y HORA --- */
+        .header-info-bar {
+            background-color: var(--color-fuchsia-bg); 
+            color: white; 
+            padding: 10px 20px;
+            text-align: right;
+            font-size: 1.1em;
+            font-weight: bold;
+        }
+        .header-info-bar #date-emission { float: left; }
+
+
+        /* --- PESTAÑAS DE CIUDADES --- */
+        .city-tabs { 
+            display: flex; 
+            justify-content: center; 
+            background-color: #f0f0f0; 
+            padding: 0; 
+            margin: 0; 
+        }
+        .city-tab { 
+            padding: 15px 30px; 
+            cursor: pointer; 
+            font-size: 1.1em; 
+            font-weight: bold; 
+            color: var(--color-dark-blue); 
+            border: none; 
+            background-color: transparent; 
+            transition: background-color 0.3s; 
+            margin: 0 5px;
+            border-radius: 5px;
+        }
         .city-tab:hover { background-color: #e0e0e0; }
-        .city-tab.active { background-color: #fff; color: #0d47a1; border-bottom: 2px solid #0d47a1; }
+        .city-tab.active { 
+            background-color: white; 
+            border-bottom: 4px solid var(--color-dark-blue); 
+            border-radius: 0; /* Desactiva el radio inferior para la línea */
+        }
+        
+        /* --- SECCIÓN PRINCIPAL DEL PRONÓSTICO --- */
+        .tab-content { padding: 0 10px 10px 10px; background-color: white; }
+        
+        /* --- ESTILO DE LA TABLA DE DÍAS (VIERNES/SÁBADO) --- */
+        .day-section { 
+            margin: 15px 0; 
+            background-color: var(--color-fuchsia-bg); 
+            border-radius: var(--border-radius-lg);
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
 
-        /* Estilos para el formato de tabla */
-        .grid-day-section { padding: 20px; }
-        .grid-day-header { background-color: #1565c0; color: white; padding: 10px 20px; border-radius: 10px 10px 0 0; display: flex; font-weight: bold; font-size: 1.2em; }
-        .grid-day-header .label { width: 150px; padding-left: 20px; }
-        .grid-day-header .time-of-day { flex: 1; text-align: center; }
-        .grid-forecast-grid { display: flex; flex-direction: column; }
-        .grid-forecast-row { display: flex; background-color: #e3f2fd; border-bottom: 1px solid #ccc; }
-        .grid-forecast-row:last-of-type { border-bottom: none; }
-        .grid-forecast-label { width: 150px; padding: 10px 20px; font-weight: bold; color: #333; display: flex; align-items: center; }
-        .grid-forecast-item { flex: 1; text-align: center; padding: 10px 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .grid-forecast-temp { font-size: 1.5em; font-weight: bold; }
-        .grid-forecast-icon { font-size: 4em; }
-        .grid-forecast-item img { width: 60px; height: 60px; } /* Ajuste de tamaño de íconos en tabla */
-        .grid-temp-min-max { width: 150px; padding: 10px 20px; text-align: left; display: flex; flex-direction: column; justify-content: center; font-size: 0.9em; }
-        .grid-temp-min-max .min-temp, .grid-temp-min-max .max-temp { display: flex; gap: 5px; align-items: center; }
-        .grid-temp-min-max .min-temp::before { content: 'Min:'; color: #0077c2; }
-        .grid-temp-min-max .max-temp::before { content: 'Max:'; color: #d32f2f; }
-        .grid-temp-min-max span { font-weight: bold; }
-        .grid-temp-min-max .blue-text { color: #0077c2; }
-        .grid-temp-min-max .red-text { color: #d32f2f; }
-        .grid-day-section.sabado .grid-day-header { background-color: #00796b; }
-        .grid-day-section.sabado .grid-forecast-row { background-color: #e0f2f1; }
-        .grid-day-section.sabado .grid-forecast-label { color: #004d40; }
-        .grid-day-section.sabado .grid-temp-min-max .min-temp::before { color: #00796b; }
-        .grid-day-section.sabado .grid-temp-min-max .max-temp::before { color: #d32f2f; }
+        .day-header {
+            display: flex;
+            background-color: var(--color-table-header);
+            color: white;
+            font-weight: bold;
+            font-size: 1.4em;
+            padding: 15px 20px;
+            align-items: center;
+        }
 
-        /* Estilos para el formato de tarjeta */
-        .card-forecast-container { display: flex; justify-content: space-around; padding: 20px; gap: 20px; flex-wrap: wrap;}
-        .weather-card { flex: 1; min-width: 150px; max-width: 200px; background-color: #64b5f6; color: white; border-radius: 15px; padding: 20px; text-align: center; display: flex; flex-direction: column; gap: 15px; }
-        .weather-card.dark-blue { background-color: #42a5f5; }
-        .day-info { font-size: 1.5em; font-weight: bold; }
-        .date-info { font-size: 1em; }
-        .weather-icons-temps { display: flex; justify-content: space-around; align-items: center; }
-        .day-weather, .night-weather { display: flex; flex-direction: column; align-items: center; }
-        .day-weather img, .night-weather img { width: 50px; height: 50px; } /* Ajuste de tamaño de íconos en tarjeta */
-        .temp-min-max-icon { display: flex; align-items: center; gap: 5px; font-size: 1em; font-weight: normal; }
-        .temp-min-max-icon .temp-bar { font-size: 1.5em; }
-        .sky-condition, .wind-info { font-size: 1.2em; }
-        .arrow-down { font-size: 2em; }
-        .footnote { text-align: center; padding: 10px; font-size: 0.9em; color: #555; background-color: #f0f0f0; }
+        .day-name { width: 30%; text-align: left; font-size: 1.4em; }
+        .day-name-time { 
+            width: 70%; 
+            display: flex; 
+            justify-content: space-around; 
+            font-size: 0.8em; 
+            text-align: center; 
+        }
 
-        /* Ocultar el contenido de los pronósticos */
+        /* Estilos específicos para SÁBADO (Madrugada, Mañana, Tarde, Noche) */
+        .day-section.sabado .day-header { background-color: #4CAF50; } /* Verde en el original, ajustado a tu paleta */
+        .day-section.sabado .day-name-time { 
+            font-size: 0.9em; 
+            justify-content: space-between; 
+            padding: 0 10px;
+        }
+        .day-section.sabado .day-name-time > div { width: 25%; } /* Distribuye los 4 tiempos */
+
+
+        .table-grid {
+            display: grid;
+            grid-template-columns: 30% repeat(3, 1fr); /* Min/Max + Mañana, Tarde, Noche */
+            background-color: var(--color-fuchsia-bg);
+            color: white;
+            padding: 10px 0;
+            gap: 1px 0; /* Espacio entre filas */
+        }
+
+        .day-section.sabado .table-grid {
+            grid-template-columns: 30% repeat(4, 1fr); /* Min/Max + Madrugada, Mañana, Tarde, Noche */
+        }
+
+        .grid-row-label {
+            display: flex;
+            align-items: center;
+            padding: 10px 20px;
+            font-weight: bold;
+            font-size: 1em;
+            background-color: var(--color-fuchsia-bg);
+        }
+
+        .grid-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 5px;
+            text-align: center;
+            background-color: var(--color-fuchsia-bg);
+            font-size: 1em;
+            line-height: 1.2;
+        }
+
+        /* Estilos de Temperatura MIN/MAX */
+        .temp-min-max-col {
+            padding: 10px 20px;
+            font-size: 0.8em;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .temp-min-max-row {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-bottom: 5px;
+            font-size: 1.2em;
+        }
+        .temp-min-max-row span { font-weight: bold; }
+        .temp-min-max-row.min-temp { color: #87CEFA; } /* Azul claro para Mínima */
+        .temp-min-max-row.max-temp { color: #FFD700; } /* Amarillo para Máxima */
+        .temp-min-max-row small { font-size: 0.6em; } /* Estilos para los asteriscos */
+
+
+        /* Estilos de Íconos y Temps de la Franja Horaria */
+        .temp-icon-wrapper img { width: 50px; height: 50px; margin-bottom: 5px; }
+        .temp-icon-wrapper { font-size: 2em; }
+        .temp-value { font-size: 1.8em; font-weight: bold; }
+
+        /* --- ESTILO DE LAS TARJETAS DE DÍAS (DOMINGO/LUNES) --- */
+        .card-forecast-container { 
+            display: flex; 
+            justify-content: space-between; 
+            padding: 0; 
+            gap: 15px; 
+            margin-top: 15px; 
+        }
+
+        .weather-card { 
+            flex: 1; 
+            background-color: var(--color-fuchsia-bg); 
+            color: white; 
+            border-radius: var(--border-radius-lg); 
+            padding: 20px; 
+            text-align: center; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 15px;
+            min-height: 350px; /* Para que ambos tengan la misma altura */
+        }
+
+        .card-header { font-size: 1.6em; font-weight: 800; border-bottom: 2px solid white; padding-bottom: 5px; }
+        .card-date { font-size: 1em; margin-bottom: 10px; }
+        
+        .card-temp-icon { display: flex; justify-content: space-around; align-items: center; margin-bottom: 15px; }
+        .card-temp-group { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+        .card-temp-group img { width: 70px; height: 70px; }
+        .card-temp-group .temp-value { font-size: 1.8em; font-weight: bold; }
+        .card-temp-group .temp-value small { font-size: 0.6em; }
+
+        .card-description { font-size: 1.1em; line-height: 1.4; font-weight: 500; }
+
+        .card-wind-info { 
+            font-size: 1.1em; 
+            font-weight: bold; 
+            margin-top: auto; /* Empuja el viento hacia abajo */
+            padding-top: 10px;
+            border-top: 1px solid rgba(255,255,255,0.3);
+        }
+        .card-wind-info img { width: 30px; height: 30px; margin-top: 5px; } /* Flecha de viento */
+
+
+        /* --- NOTA DE PIE DE PÁGINA --- */
+        .footnote { 
+            text-align: center; 
+            padding: 10px 0; 
+            font-size: 0.9em; 
+            color: var(--color-text-dark); 
+            background-color: white; 
+            font-weight: bold;
+        }
+
+        /* Ocultar contenido por defecto */
         .tab-content { display: none; }
         .tab-content.active { display: block; }
         
-        /* Estilos del panel de administración */
+        /* Estilos del panel de administración (mantener funcionales) */
         #admin-panel { display: none; margin-top: 20px; padding: 20px; background-color: #f9f9f9; border-radius: 10px; width: 800px; max-width: 100%; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         #admin-panel.active { display: block; }
         .admin-form-group { margin-bottom: 15px; border: 1px solid #ddd; padding: 10px; border-radius: 5px; background-color: #fff; }
-        .admin-form-group label { display: block; font-weight: bold; margin-bottom: 5px; color: #0d47a1; font-size: 0.9em;}
+        .admin-form-group label { display: block; font-weight: bold; margin-bottom: 5px; color: var(--color-dark-blue); font-size: 0.9em;}
         .admin-form-group input, .admin-form-group select { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 3px; font-size: 1em; }
         .admin-buttons { text-align: right; margin-top: 20px; }
-        .admin-buttons button { padding: 10px 15px; background-color: #0d47a1; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
-        .admin-buttons button:hover { background-color: #1e88e5; }
+        .admin-buttons button { padding: 10px 15px; background-color: var(--color-dark-blue); color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
         #admin-panel h3 { border-bottom: 2px solid #ccc; padding-bottom: 5px; margin-top: 25px; color: #333; }
-        #admin-panel h4 { margin-top: 20px; color: #1565c0; background-color: #e3f2fd; padding: 5px 10px; border-radius: 5px;}
+        #admin-panel h4 { margin-top: 20px; color: var(--color-table-header); background-color: #e3f2fd; padding: 5px 10px; border-radius: 5px;}
         #admin-panel h5 { margin-top: 10px; color: #444; font-size: 1em; }
+        #login-button, #logout-button { margin-top: 20px; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; color: white; }
+        #login-button { background-color: #4CAF50; }
+        #logout-button { background-color: #f44336; }
 
-        /* Estilos para los botones de login/logout */
-        #login-button, #logout-button {
-            transition: background-color 0.3s;
-        }
-        #login-button:hover { background-color: #43A047 !important; }
-        #logout-button:hover { background-color: #E53935 !important; }
     </style>
 </head>
 <body>
@@ -102,8 +303,9 @@
                 <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/cf/UNLP_Logo_2016.svg/1200px-UNLP_Logo_2016.svg.png" alt="Logo UNLP">
             </div>
         </div>
-        <div class="header-info-bar" style="text-align: center; padding: 10px; background-color: #bbdefb; font-weight: bold;">
-            <span id="date-emission"></span>, <span id="time-emission"></span>
+        <div class="header-info-bar">
+            <span id="date-emission"></span>
+            <span id="time-emission"></span>
         </div>
 
         <div class="city-tabs">
@@ -116,8 +318,10 @@
         <div id="mar-del-plata" class="tab-content"></div>
         <div id="junin" class="tab-content"></div>
 
-        <button id="login-button" style="margin-top: 20px; padding: 10px 20px; background-color: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer;">Iniciar Sesión</button>
-        <button id="logout-button" style="margin-top: 20px; padding: 10px 20px; background-color: #f44336; color: white; border: none; border-radius: 5px; cursor: pointer; display: none;">Cerrar Sesión</button>
+        <div class="footnote" style="color: black;">* TEMPERATURA EN ZONA SUBURBANA</div>
+
+        <button id="login-button">Iniciar Sesión</button>
+        <button id="logout-button" style="display: none;">Cerrar Sesión</button>
 
         <div id="admin-panel">
             <h2>Panel de Administración de Pronósticos</h2>
@@ -143,7 +347,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-firestore.js"></script>
     
     <script>
-        // *** 1. CONFIGURACIÓN DE FIREBASE (Asumo que esta config. es correcta) ***
+        // *** 1. CONFIGURACIÓN DE FIREBASE (Asegúrate de que esta sea correcta) ***
         const firebaseConfig = {
             apiKey: "AIzaSyCumkjuYFKepwDnUNb-oYGWle_OkgR_y3A",
             authDomain: "web-pronostico.firebaseapp.com",
@@ -153,7 +357,6 @@
             appId: "1:328619903034:web:cb6dabaed0226cfc754d03",
             measurementId: "G-5RN96Y972V"
         };
-        // Inicializa solo si aún no ha sido inicializada
         if (!firebase.apps.length) {
             firebase.initializeApp(firebaseConfig);
         }
@@ -174,119 +377,112 @@
         const timeEmission = document.getElementById('time-emission');
 
         // Función auxiliar para normalizar el nombre del ícono
+        // (Convierte "Parcialmente Nublado" a "parcialmente-nublado.png")
         function normalizeIconName(text) {
             return text.replace(/\s/g, '-').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace('á', 'a').replace('é', 'e').replace('í', 'i').replace('ó', 'o').replace('ú', 'u');
         }
 
-
-        // Función para renderizar el pronóstico
+        // Función para renderizar el pronóstico con el NUEVO diseño
         function renderForecast(cityData, targetElementId) {
             const container = document.getElementById(targetElementId);
             container.innerHTML = ''; // Limpia el contenido anterior
+            
+            // Actualiza la barra de información
+            dateEmission.textContent = cityData.emision.fecha;
+            timeEmission.textContent = `Hora de emisión ${cityData.emision.hora}`;
 
-            // Renderizar los días en formato de tabla
-            const gridDays = ['hoy', 'manana'];
+
+            // --- 1. RENDERIZAR VIERNES/SÁBADO (Formato de TABLA) ---
+            const gridDays = ['viernes', 'sabado']; 
+            
             gridDays.forEach(dayKey => {
                 const day = cityData.pronostico[dayKey];
                 if (!day) return;
-
+                
+                // Define las franjas horarias y si incluye "Madrugada"
+                const timeKeys = dayKey === 'sabado' ? ['madrugada', 'manana', 'tarde', 'noche'] : ['manana', 'tarde', 'noche'];
+                
                 const daySection = document.createElement('div');
-                daySection.className = `grid-day-section ${dayKey}`; // Usamos dayKey para la clase
+                daySection.className = `day-section ${dayKey}`; 
                 daySection.innerHTML = `
-                    <div class="grid-day-header">
-                        <div class="label">${day.dia}</div>
-                        <span class="time-of-day">MAÑANA</span>
-                        <span class="time-of-day">TARDE</span>
-                        <span class="time-of-day">NOCHE</span>
+                    <div class="day-header">
+                        <div class="day-name">${day.dia.toUpperCase()}</div>
+                        <div class="day-name-time">
+                            ${timeKeys.map(timeKey => `<div>${timeKey.toUpperCase()}</div>`).join('')}
+                        </div>
                     </div>
-                    <div class="grid-forecast-grid">
-                        <div class="grid-forecast-row">
-                            <div class="grid-temp-min-max">
-                                <div class="max-temp"><span class="red-text">${day.max_temp}°c</span></div>
-                                <div class="min-temp"><span class="blue-text">${day.min_temp}°c</span></div>
+                    <div class="table-grid">
+                        <div class="grid-row-label temp-min-max-col">
+                            <div class="temp-min-max-row max-temp">
+                                🌡️ <span>${day.max_temp}°C</span>
                             </div>
-                            <div class="grid-forecast-item">
-                                <div class="grid-forecast-icon">
-                                    <img src="images/${normalizeIconName(day.manana.tiempo)}.png" alt="${day.manana.tiempo}">
-                                </div>
-                                <div class="grid-forecast-temp">${day.manana.temp}°c</div>
-                            </div>
-                            <div class="grid-forecast-item">
-                                <div class="grid-forecast-icon">
-                                    <img src="images/${normalizeIconName(day.tarde.tiempo)}.png" alt="${day.tarde.tiempo}">
-                                </div>
-                                <div class="grid-forecast-temp">${day.tarde.temp}°c</div>
-                            </div>
-                            <div class="grid-forecast-item">
-                                <div class="grid-forecast-icon">
-                                    <img src="images/${normalizeIconName(day.noche.tiempo)}.png" alt="${day.noche.tiempo}">
-                                </div>
-                                <div class="grid-forecast-temp">${day.noche.temp}°c</div>
+                            <div class="temp-min-max-row min-temp">
+                                🌡️ <span>${day.min_temp}°C</span>
                             </div>
                         </div>
-                        <div class="grid-forecast-row">
-                            <div class="grid-forecast-label">Vientos</div>
-                            <div class="grid-forecast-item">${day.manana.viento}</div>
-                            <div class="grid-forecast-item">${day.tarde.viento}</div>
-                            <div class="grid-forecast-item">${day.noche.viento}</div>
-                        </div>
-                        <div class="grid-forecast-row">
-                            <div class="grid-forecast-label">Tiempo</div>
-                            <div class="grid-forecast-item">${day.manana.tiempo}</div>
-                            <div class="grid-forecast-item">${day.tarde.tiempo}</div>
-                            <div class="grid-forecast-item">${day.noche.tiempo}</div>
-                        </div>
+
+                        ${timeKeys.map(timeKey => `
+                            <div class="grid-item">
+                                <div class="temp-icon-wrapper">
+                                    <img src="images/${normalizeIconName(day[timeKey].tiempo)}.png" alt="${day[timeKey].tiempo}">
+                                </div>
+                                <div class="temp-value">${day[timeKey].temp}°C</div>
+                            </div>
+                        `).join('')}
+
+                        <div class="grid-row-label">Vientos</div>
+                        ${timeKeys.map(timeKey => `<div class="grid-item">${day[timeKey].viento}</div>`).join('')}
+
+                        <div class="grid-row-label">Tiempo</div>
+                        ${timeKeys.map(timeKey => `<div class="grid-item">${day[timeKey].tiempo}</div>`).join('')}
+                        
                     </div>
                 `;
                 container.appendChild(daySection);
             });
 
-            // Renderizar los días en formato de tarjeta (los días de la colección 'semana')
+
+            // --- 2. RENDERIZAR DOMINGO/LUNES (Formato de TARJETA) ---
             const cardContainer = document.createElement('div');
             cardContainer.className = 'card-forecast-container';
             container.appendChild(cardContainer);
 
-            // Obtener datos de la colección `semana`
-            db.collection('ciudades').doc(targetElementId).collection('semana').get().then(snapshot => {
-                snapshot.forEach(doc => {
-                    const card = doc.data();
-                    const cardElement = document.createElement('div');
-                    cardElement.className = 'weather-card';
-                    cardElement.innerHTML = `
-                        <div class="day-info">${card.dia}</div>
-                        <div class="date-info">${card.fecha}</div>
-                        <div class="weather-icons-temps">
-                            <div class="day-weather">
-                                <span style="font-size: 4em;">
-                                    <img src="images/${normalizeIconName(card.condicion_cielo_dia)}.png" alt="${card.condicion_cielo_dia}">
-                                </span>
-                                <div class="temp-min-max-icon"><span class="temp-bar">🌡️</span> <span>${card.dia_temp}°c</span></div>
-                            </div>
-                            <div class="night-weather">
-                                <span style="font-size: 4em;">
-                                    <img src="images/${normalizeIconName(card.condicion_cielo_noche)}.png" alt="${card.condicion_cielo_noche}">
-                                </span>
-                                <div class="temp-min-max-icon"><span class="temp-bar">🌡️</span> <span>${card.noche_temp}°c</span></div>
-                            </div>
+            // Se asume que los datos de las tarjetas están en una subcolección 'semana'
+            // Opcionalmente, puedes mapear los días de 'semana' a 'domingo' y 'lunes'
+            const cardDays = ['domingo', 'lunes']; 
+
+            cardDays.forEach(cardDayKey => {
+                const card = cityData.pronostico[cardDayKey];
+                if (!card) return;
+
+                const cardElement = document.createElement('div');
+                cardElement.className = 'weather-card';
+                cardElement.innerHTML = `
+                    <div class="card-header">${card.dia.toUpperCase()}</div>
+                    <div class="card-date">${card.fecha}</div>
+                    <div class="card-temp-icon">
+                        <div class="card-temp-group">
+                            <img src="images/${normalizeIconName(card.icono_dia)}.png" alt="${card.icono_dia}">
+                            <div class="temp-value">🌡️ ${card.temp_dia}°C<small>*</small></div>
                         </div>
-                        <div class="sky-condition">${card.condicion_cielo}</div>
-                        <div class="arrow-down">⬇️</div>
-                        <div class="wind-info">${card.viento}</div>
-                    `;
-                    cardContainer.appendChild(cardElement);
-                });
-            }).catch(e => console.error("Error al cargar la colección semana:", e));
+                        <div class="card-temp-group">
+                            <img src="images/${normalizeIconName(card.icono_noche)}.png" alt="${card.icono_noche}">
+                            <div class="temp-value">🌡️ ${card.temp_noche}°C<small>*</small></div>
+                        </div>
+                    </div>
+                    <div class="card-description">${card.descripcion}</div>
+                    <div class="card-wind-info">
+                        ${card.viento}
+                        <img src="images/arrow-up.png" alt="Dirección de Viento" style="transform: rotate(${card.angulo_viento || 0}deg);">
+                    </div>
+                `;
+                cardContainer.appendChild(cardElement);
+            });
 
-            const footnote = document.createElement('div');
-            footnote.className = 'footnote';
-            footnote.textContent = '* TEMPERATURA EN ZONA SUBURBANA';
-            container.appendChild(footnote);
-
-            dateEmission.textContent = cityData.emision.fecha;
-            timeEmission.textContent = `Hora de emisión ${cityData.emision.hora}`;
         }
 
-        // Función para cargar los datos de una ciudad
+        // --- FUNCIONES DE CARGA Y AUTENTICACIÓN (MANTENIDAS DEL CÓDIGO ANTERIOR) ---
+
         async function loadForecast(cityId) {
             try {
                 const docRef = db.collection('ciudades').doc(cityId);
@@ -304,29 +500,23 @@
             }
         }
 
-        // Lógica de las pestañas
         tabs.forEach(tab => {
             tab.addEventListener('click', () => {
                 const targetId = tab.getAttribute('data-city');
-                
                 tabs.forEach(t => t.classList.remove('active'));
                 tab.classList.add('active');
-
                 contents.forEach(c => c.classList.remove('active'));
                 document.getElementById(targetId).classList.add('active');
-
                 cityTitle.textContent = tab.textContent;
                 loadForecast(targetId);
-                
-                // Si el panel de admin está activo, recargar el formulario con la nueva ciudad
-                if (adminPanel.style.display === 'block') {
+                if (auth.currentUser) { // Recargar admin form si está logueado
                     adminCitySelect.value = targetId;
                     generateAdminForm();
                 }
             });
         });
 
-        // Función para generar el formulario de edición
+        // Modificación a generateAdminForm para incluir los días de la tarjeta (domingo/lunes)
         async function generateAdminForm() {
             const cityId = adminCitySelect.value;
             const docRef = db.collection('ciudades').doc(cityId);
@@ -341,24 +531,25 @@
             let formHtml = `
                 <h3>Datos de Emisión Globales</h3>
                 <div class="admin-form-group">
-                    <label for="admin-fecha">Fecha (Ej: Lunes 11 de Octubre):</label>
+                    <label for="admin-fecha">Fecha (Ej: 03/OCT/25):</label>
                     <input type="text" id="admin-fecha" value="${data.emision.fecha}">
                 </div>
                 <div class="admin-form-group">
-                    <label for="admin-hora">Hora (Ej: 13:00 hs.):</label>
+                    <label for="admin-hora">Hora (Ej: 08:00hs):</label>
                     <input type="text" id="admin-hora" value="${data.emision.hora}">
                 </div>
                 
-                <h3>Pronóstico de la Semana (Días en tabla: Hoy y Mañana)</h3>
+                <h3>Pronóstico de la Semana (Formato Tabla)</h3>
             `;
             
-            // Días de la tabla (hoy y mañana)
-            ['hoy', 'manana'].forEach(dayKey => {
+            // Días de la tabla (viernes y sabado)
+            ['viernes', 'sabado'].forEach(dayKey => {
                 const day = data.pronostico[dayKey];
                 if (!day) return;
+                const timeKeys = dayKey === 'sabado' ? ['madrugada', 'manana', 'tarde', 'noche'] : ['manana', 'tarde', 'noche'];
 
                 formHtml += `
-                    <h4>${day.dia} - Temperaturas Generales</h4>
+                    <h4>${day.dia}</h4>
                     <div style="display: flex; gap: 20px;">
                         <div class="admin-form-group" style="flex: 1;">
                             <label>Temperatura Mínima:</label>
@@ -372,13 +563,13 @@
                 `;
                 
                 // Franjas horarias de cada día
-                ['manana', 'tarde', 'noche'].forEach(timeKey => {
+                timeKeys.forEach(timeKey => {
                     formHtml += `
                         <div style="border: 1px solid #bbdefb; padding: 10px; margin-top: 10px; border-radius: 5px;">
                             <h5>${timeKey.toUpperCase()}</h5>
                             <div class="admin-form-group">
                                 <label>Condición del Cielo (Texto, Ej: Despejado):</label>
-                                <input type="text" data-path="pronostico.${dayKey}.${timeKey}.tiempo" value="${day[timeKey].tiempo}" placeholder="Ej: Despejado. Debe coincidir con el nombre de tu archivo PNG (sin espacios ni acentos)">
+                                <input type="text" data-path="pronostico.${dayKey}.${timeKey}.tiempo" value="${day[timeKey].tiempo}">
                             </div>
                             <div class="admin-form-group">
                                 <label>Temperatura:</label>
@@ -392,20 +583,67 @@
                     `;
                 });
             });
-
+            
             formHtml += `
-                <h3>Pronóstico de la Semana (Días en tarjetas)</h3>
-                <p style="color: red;"><strong>Advertencia:</strong> Para editar los datos de los días de la semana en formato tarjeta, debes editarlos directamente en la subcolección <strong>'semana'</strong> de la ciudad correspondiente en la consola de Firebase Firestore, ya que estos datos suelen ser más complejos y se editan por documento.</p>
+                <h3>Pronóstico de la Semana (Formato Tarjeta)</h3>
             `;
+
+            // Días de tarjeta (domingo y lunes)
+            ['domingo', 'lunes'].forEach(cardDayKey => {
+                const card = data.pronostico[cardDayKey];
+                if (!card) return;
+
+                formHtml += `
+                    <h4>${card.dia} - Tarjeta</h4>
+                    <div class="admin-form-group">
+                        <label>Fecha (Ej: 05/OCT/25):</label>
+                        <input type="text" data-path="pronostico.${cardDayKey}.fecha" value="${card.fecha}">
+                    </div>
+                    <div style="display: flex; gap: 20px;">
+                        <div class="admin-form-group" style="flex: 1;">
+                            <label>Temperatura Día:</label>
+                            <input type="number" data-path="pronostico.${cardDayKey}.temp_dia" value="${card.temp_dia}">
+                        </div>
+                        <div class="admin-form-group" style="flex: 1;">
+                            <label>Ícono Día (Texto):</label>
+                            <input type="text" data-path="pronostico.${cardDayKey}.icono_dia" value="${card.icono_dia}">
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 20px;">
+                        <div class="admin-form-group" style="flex: 1;">
+                            <label>Temperatura Noche:</label>
+                            <input type="number" data-path="pronostico.${cardDayKey}.temp_noche" value="${card.temp_noche}">
+                        </div>
+                        <div class="admin-form-group" style="flex: 1;">
+                            <label>Ícono Noche (Texto):</label>
+                            <input type="text" data-path="pronostico.${cardDayKey}.icono_noche" value="${card.icono_noche}">
+                        </div>
+                    </div>
+                    <div class="admin-form-group">
+                        <label>Descripción General (Texto largo):</label>
+                        <textarea data-path="pronostico.${cardDayKey}.descripcion" style="width: 100%; height: 80px;">${card.descripcion}</textarea>
+                    </div>
+                    <div class="admin-form-group">
+                        <label>Vientos (Texto):</label>
+                        <input type="text" data-path="pronostico.${cardDayKey}.viento" value="${card.viento}">
+                    </div>
+                    <div class="admin-form-group">
+                        <label>Ángulo de Viento (Grados, para la flecha):</label>
+                        <input type="number" data-path="pronostico.${cardDayKey}.angulo_viento" value="${card.angulo_viento || 0}">
+                    </div>
+                `;
+            });
             
             forecastForm.innerHTML = formHtml;
         }
+
 
         // Lógica para guardar los cambios
         saveButton.addEventListener('click', async () => {
             const cityId = adminCitySelect.value;
             const updates = {};
-            const inputs = forecastForm.querySelectorAll('input[data-path]');
+            // Recolectar todos los inputs con data-path (incluidos los de las tarjetas)
+            const inputs = forecastForm.querySelectorAll('input[data-path], textarea[data-path]');
             let isValid = true;
 
             inputs.forEach(input => {
@@ -443,12 +681,10 @@
                 await db.collection('ciudades').doc(cityId).update(updates);
                 alert('✅ ¡Cambios guardados con éxito!');
                 
-                // Recargar el pronóstico para que los usuarios vean los cambios
                 const activeTab = document.querySelector('.city-tab.active').getAttribute('data-city');
                 if (activeTab === cityId) {
                     loadForecast(cityId);
                 }
-                // Si no era la pestaña activa, se actualizará al cambiar de pestaña.
             } catch (e) {
                 console.error("Error al guardar los cambios:", e);
                 alert('❌ Error al guardar los cambios. Revisa la consola para más detalles o verifica tus permisos de Firestore.');
@@ -458,17 +694,14 @@
         // Manejador del select de ciudades en el panel de admin
         adminCitySelect.addEventListener('change', generateAdminForm);
             
-        // Lógica de autenticación
+        // Lógica de autenticación (sin cambios)
         auth.onAuthStateChanged(user => {
             if (user) {
-                // El usuario está logueado
                 loginButton.style.display = 'none';
                 logoutButton.style.display = 'block';
                 adminPanel.style.display = 'block';
-                // Generar el formulario de edición para la ciudad por defecto
                 generateAdminForm(); 
             } else {
-                // El usuario no está logueado
                 loginButton.style.display = 'block';
                 logoutButton.style.display = 'none';
                 adminPanel.style.display = 'none';
@@ -476,7 +709,6 @@
             }
         });
         
-        // Manejadores de eventos del botón de login y logout
         loginButton.addEventListener('click', () => {
             const email = prompt("Ingresa tu correo electrónico:");
             const password = prompt("Ingresa tu contraseña:");
@@ -492,7 +724,7 @@
             auth.signOut();
         });
 
-        // *** Carga el pronóstico inicial al cargar la página ***
+        // Carga el pronóstico inicial
         document.addEventListener('DOMContentLoaded', () => {
             loadForecast('la-plata');
         });
