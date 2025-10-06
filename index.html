@@ -34,6 +34,7 @@
         .grid-forecast-item { flex: 1; text-align: center; padding: 10px 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .grid-forecast-temp { font-size: 1.5em; font-weight: bold; }
         .grid-forecast-icon { font-size: 4em; }
+        .grid-forecast-item img { width: 60px; height: 60px; } /* Ajuste de tamaño de íconos en tabla */
         .grid-temp-min-max { width: 150px; padding: 10px 20px; text-align: left; display: flex; flex-direction: column; justify-content: center; font-size: 0.9em; }
         .grid-temp-min-max .min-temp, .grid-temp-min-max .max-temp { display: flex; gap: 5px; align-items: center; }
         .grid-temp-min-max .min-temp::before { content: 'Min:'; color: #0077c2; }
@@ -48,13 +49,14 @@
         .grid-day-section.sabado .grid-temp-min-max .max-temp::before { color: #d32f2f; }
 
         /* Estilos para el formato de tarjeta */
-        .card-forecast-container { display: flex; justify-content: space-around; padding: 20px; gap: 20px; }
-        .weather-card { flex: 1; background-color: #64b5f6; color: white; border-radius: 15px; padding: 20px; text-align: center; display: flex; flex-direction: column; gap: 15px; }
+        .card-forecast-container { display: flex; justify-content: space-around; padding: 20px; gap: 20px; flex-wrap: wrap;}
+        .weather-card { flex: 1; min-width: 150px; max-width: 200px; background-color: #64b5f6; color: white; border-radius: 15px; padding: 20px; text-align: center; display: flex; flex-direction: column; gap: 15px; }
         .weather-card.dark-blue { background-color: #42a5f5; }
         .day-info { font-size: 1.5em; font-weight: bold; }
         .date-info { font-size: 1em; }
         .weather-icons-temps { display: flex; justify-content: space-around; align-items: center; }
         .day-weather, .night-weather { display: flex; flex-direction: column; align-items: center; }
+        .day-weather img, .night-weather img { width: 50px; height: 50px; } /* Ajuste de tamaño de íconos en tarjeta */
         .temp-min-max-icon { display: flex; align-items: center; gap: 5px; font-size: 1em; font-weight: normal; }
         .temp-min-max-icon .temp-bar { font-size: 1.5em; }
         .sky-condition, .wind-info { font-size: 1.2em; }
@@ -66,14 +68,24 @@
         .tab-content.active { display: block; }
         
         /* Estilos del panel de administración */
-        #admin-panel { display: none; margin-top: 20px; padding: 20px; background-color: #f9f9f9; border-radius: 10px; width: 800px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        #admin-panel { display: none; margin-top: 20px; padding: 20px; background-color: #f9f9f9; border-radius: 10px; width: 800px; max-width: 100%; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         #admin-panel.active { display: block; }
-        .admin-form-group { margin-bottom: 15px; }
-        .admin-form-group label { display: block; font-weight: bold; margin-bottom: 5px; }
-        .admin-form-group input, .admin-form-group select { width: 100%; padding: 8px; box-sizing: border-box; }
-        .admin-buttons { text-align: right; }
-        .admin-buttons button { padding: 10px 15px; background-color: #0d47a1; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        .admin-form-group { margin-bottom: 15px; border: 1px solid #ddd; padding: 10px; border-radius: 5px; background-color: #fff; }
+        .admin-form-group label { display: block; font-weight: bold; margin-bottom: 5px; color: #0d47a1; font-size: 0.9em;}
+        .admin-form-group input, .admin-form-group select { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 3px; font-size: 1em; }
+        .admin-buttons { text-align: right; margin-top: 20px; }
+        .admin-buttons button { padding: 10px 15px; background-color: #0d47a1; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
         .admin-buttons button:hover { background-color: #1e88e5; }
+        #admin-panel h3 { border-bottom: 2px solid #ccc; padding-bottom: 5px; margin-top: 25px; color: #333; }
+        #admin-panel h4 { margin-top: 20px; color: #1565c0; background-color: #e3f2fd; padding: 5px 10px; border-radius: 5px;}
+        #admin-panel h5 { margin-top: 10px; color: #444; font-size: 1em; }
+
+        /* Estilos para los botones de login/logout */
+        #login-button, #logout-button {
+            transition: background-color 0.3s;
+        }
+        #login-button:hover { background-color: #43A047 !important; }
+        #logout-button:hover { background-color: #E53935 !important; }
     </style>
 </head>
 <body>
@@ -90,9 +102,8 @@
                 <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/cf/UNLP_Logo_2016.svg/1200px-UNLP_Logo_2016.svg.png" alt="Logo UNLP">
             </div>
         </div>
-        <div class="header-info-bar">
-            <span id="date-emission"></span>
-            <span id="time-emission"></span>
+        <div class="header-info-bar" style="text-align: center; padding: 10px; background-color: #bbdefb; font-weight: bold;">
+            <span id="date-emission"></span>, <span id="time-emission"></span>
         </div>
 
         <div class="city-tabs">
@@ -109,16 +120,17 @@
         <button id="logout-button" style="margin-top: 20px; padding: 10px 20px; background-color: #f44336; color: white; border: none; border-radius: 5px; cursor: pointer; display: none;">Cerrar Sesión</button>
 
         <div id="admin-panel">
-            <h2>Panel de Administración</h2>
+            <h2>Panel de Administración de Pronósticos</h2>
+            <div class="admin-form-group">
+                <label for="admin-city-select">Seleccionar Ciudad a Editar:</label>
+                <select id="admin-city-select">
+                    <option value="la-plata">La Plata</option>
+                    <option value="mar-del-plata">Mar del Plata</option>
+                    <option value="junin">Junín</option>
+                </select>
+            </div>
             <form id="forecast-form">
-                <div class="admin-form-group">
-                    <label for="admin-city-select">Seleccionar Ciudad:</label>
-                    <select id="admin-city-select">
-                        <option value="la-plata">La Plata</option>
-                        <option value="mar-del-plata">Mar del Plata</option>
-                        <option value="junin">Junín</option>
-                    </select>
-                </div>
+                <p>Cargando datos de edición...</p>
             </form>
             <div class="admin-buttons">
                 <button id="save-button">Guardar Cambios</button>
@@ -131,7 +143,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-firestore.js"></script>
     
     <script>
-        // *** 1. CONFIGURACIÓN DE FIREBASE (REEMPLAZA CON TU CÓDIGO) ***
+        // *** 1. CONFIGURACIÓN DE FIREBASE (Asumo que esta config. es correcta) ***
         const firebaseConfig = {
             apiKey: "AIzaSyCumkjuYFKepwDnUNb-oYGWle_OkgR_y3A",
             authDomain: "web-pronostico.firebaseapp.com",
@@ -141,285 +153,349 @@
             appId: "1:328619903034:web:cb6dabaed0226cfc754d03",
             measurementId: "G-5RN96Y972V"
         };
-        firebase.initializeApp(firebaseConfig);
+        // Inicializa solo si aún no ha sido inicializada
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
         const db = firebase.firestore();
         const auth = firebase.auth();
 
         // Referencias a elementos del DOM
-const tabs = document.querySelectorAll('.city-tab');
-const contents = document.querySelectorAll('.tab-content');
-const cityTitle = document.getElementById('city-title');
-const loginButton = document.getElementById('login-button');
-const logoutButton = document.getElementById('logout-button');
-const adminPanel = document.getElementById('admin-panel');
-const forecastForm = document.getElementById('forecast-form');
-const adminCitySelect = document.getElementById('admin-city-select');
-const saveButton = document.getElementById('save-button');
-const dateEmission = document.getElementById('date-emission');
-const timeEmission = document.getElementById('time-emission');
+        const tabs = document.querySelectorAll('.city-tab');
+        const contents = document.querySelectorAll('.tab-content');
+        const cityTitle = document.getElementById('city-title');
+        const loginButton = document.getElementById('login-button');
+        const logoutButton = document.getElementById('logout-button');
+        const adminPanel = document.getElementById('admin-panel');
+        const forecastForm = document.getElementById('forecast-form');
+        const adminCitySelect = document.getElementById('admin-city-select');
+        const saveButton = document.getElementById('save-button');
+        const dateEmission = document.getElementById('date-emission');
+        const timeEmission = document.getElementById('time-emission');
 
-let currentCityData = {}; // Almacena los datos de la ciudad actual
-
-// Función para renderizar el pronóstico
-function renderForecast(cityData, targetElementId) {
-    const container = document.getElementById(targetElementId);
-    container.innerHTML = ''; // Limpia el contenido anterior
-
-    // Renderizar los días en formato de tabla
-    const gridDays = ['hoy', 'manana'];
-    gridDays.forEach(dayKey => {
-        const day = cityData.pronostico[dayKey];
-        if (!day) return;
-
-        const daySection = document.createElement('div');
-        daySection.className = `grid-day-section ${day.dia.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace('á', 'a')}`;
-        daySection.innerHTML = `
-            <div class="grid-day-header">
-                <div class="label">${day.dia}</div>
-                <span class="time-of-day">MAÑANA</span>
-                <span class="time-of-day">TARDE</span>
-                <span class="time-of-day">NOCHE</span>
-            </div>
-            <div class="grid-forecast-grid">
-                <div class="grid-forecast-row">
-                    <div class="grid-temp-min-max">
-                        <div class="max-temp"><span class="red-text">${day.max_temp}°c</span></div>
-                        <div class="min-temp"><span class="blue-text">${day.min_temp}°c</span></div>
-                    </div>
-                    <div class="grid-forecast-item">
-                        <div class="grid-forecast-icon">
-                            <img src="images/${day.manana.tiempo.replace(/\s/g, '-').toLowerCase()}.png" alt="${day.manana.tiempo}">
-                        </div>
-                        <div class="grid-forecast-temp">${day.manana.temp}°c</div>
-                    </div>
-                    <div class="grid-forecast-item">
-                        <div class="grid-forecast-icon">
-                            <img src="images/${day.tarde.tiempo.replace(/\s/g, '-').toLowerCase()}.png" alt="${day.tarde.tiempo}">
-                        </div>
-                        <div class="grid-forecast-temp">${day.tarde.temp}°c</div>
-                    </div>
-                    <div class="grid-forecast-item">
-                        <div class="grid-forecast-icon">
-                            <img src="images/${day.noche.tiempo.replace(/\s/g, '-').toLowerCase()}.png" alt="${day.noche.tiempo}">
-                        </div>
-                        <div class="grid-forecast-temp">${day.noche.temp}°c</div>
-                    </div>
-                </div>
-                <div class="grid-forecast-row">
-                    <div class="grid-forecast-label">Vientos</div>
-                    <div class="grid-forecast-item">${day.manana.viento}</div>
-                    <div class="grid-forecast-item">${day.tarde.viento}</div>
-                    <div class="grid-forecast-item">${day.noche.viento}</div>
-                </div>
-                <div class="grid-forecast-row">
-                    <div class="grid-forecast-label">Tiempo</div>
-                    <div class="grid-forecast-item">${day.manana.tiempo}</div>
-                    <div class="grid-forecast-item">${day.tarde.tiempo}</div>
-                    <div class="grid-forecast-item">${day.noche.tiempo}</div>
-                </div>
-            </div>
-        `;
-        container.appendChild(daySection);
-    });
-
-    // Renderizar los días en formato de tarjeta (los días de la colección 'semana')
-    const cardContainer = document.createElement('div');
-    cardContainer.className = 'card-forecast-container';
-    container.appendChild(cardContainer);
-
-    // Obtener datos de la colección `semana`
-    db.collection('ciudades').doc(targetElementId).collection('semana').get().then(snapshot => {
-        snapshot.forEach(doc => {
-            const card = doc.data();
-            const cardElement = document.createElement('div');
-            cardElement.className = 'weather-card';
-            cardElement.innerHTML = `
-                <div class="day-info">${card.dia}</div>
-                <div class="date-info">${card.fecha}</div>
-                <div class="weather-icons-temps">
-                    <div class="day-weather">
-                        <span style="font-size: 4em;">
-                            <img src="images/${card.condicion_cielo_dia.replace(/\s/g, '-').toLowerCase()}.png" alt="${card.condicion_cielo_dia}">
-                        </span>
-                        <div class="temp-min-max-icon"><span class="temp-bar">🌡️</span> <span>${card.dia_temp}°c</span></div>
-                    </div>
-                    <div class="night-weather">
-                        <span style="font-size: 4em;">
-                            <img src="images/${card.condicion_cielo_noche.replace(/\s/g, '-').toLowerCase()}.png" alt="${card.condicion_cielo_noche}">
-                        </span>
-                        <div class="temp-min-max-icon"><span class="temp-bar">🌡️</span> <span>${card.noche_temp}°c</span></div>
-                    </div>
-                </div>
-                <div class="sky-condition">${card.condicion_cielo}</div>
-                <div class="arrow-down">⬇️</div>
-                <div class="wind-info">${card.viento}</div>
-            `;
-            cardContainer.appendChild(cardElement);
-        });
-    });
-
-    const footnote = document.createElement('div');
-    footnote.className = 'footnote';
-    footnote.textContent = '* TEMPERATURA EN ZONA SUBURBANA';
-    container.appendChild(footnote);
-
-    dateEmission.textContent = cityData.emision.fecha;
-    timeEmission.textContent = `Hora de emisión ${cityData.emision.hora}`;
-}
-
-// Función para cargar los datos de una ciudad
-async function loadForecast(cityId) {
-    try {
-        const docRef = db.collection('ciudades').doc(cityId);
-        const doc = await docRef.get();
-        if (doc.exists) {
-            currentCityData = doc.data();
-            renderForecast(currentCityData, cityId);
-        } else {
-            console.log("No such document!");
+        // Función auxiliar para normalizar el nombre del ícono
+        function normalizeIconName(text) {
+            return text.replace(/\s/g, '-').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace('á', 'a').replace('é', 'e').replace('í', 'i').replace('ó', 'o').replace('ú', 'u');
         }
-    } catch (e) {
-        console.error("Error loading document:", e);
-        alert('Error al cargar los datos. Intente de nuevo.');
-    }
-}
 
-// Lógica de las pestañas
-tabs.forEach(tab => {
-    tab.addEventListener('click', () => {
-        const targetId = tab.getAttribute('data-city');
-        
-        tabs.forEach(t => t.classList.remove('active'));
-        tab.classList.add('active');
 
-        contents.forEach(c => c.classList.remove('active'));
-        document.getElementById(targetId).classList.add('active');
+        // Función para renderizar el pronóstico
+        function renderForecast(cityData, targetElementId) {
+            const container = document.getElementById(targetElementId);
+            container.innerHTML = ''; // Limpia el contenido anterior
 
-        cityTitle.textContent = tab.textContent;
-        loadForecast(targetId);
-    });
-});
+            // Renderizar los días en formato de tabla
+            const gridDays = ['hoy', 'manana'];
+            gridDays.forEach(dayKey => {
+                const day = cityData.pronostico[dayKey];
+                if (!day) return;
 
-// Lógica de autenticación
-auth.onAuthStateChanged(user => {
-    if (user) {
-        // El usuario está logueado
-        loginButton.style.display = 'none';
-        logoutButton.style.display = 'block';
-        adminPanel.style.display = 'block';
-        // Generar el formulario de edición
-        generateAdminForm();
-    } else {
-        // El usuario no está logueado
-        loginButton.style.display = 'block';
-        logoutButton.style.display = 'none';
-        adminPanel.style.display = 'none';
-    }
-});
-
-// Función para generar el formulario de edición
-async function generateAdminForm() {
-    const cityId = adminCitySelect.value;
-    const docRef = db.collection('ciudades').doc(cityId);
-    const doc = await docRef.get();
-    if (!doc.exists) return;
-
-    const data = doc.data();
-    const formHtml = `
-        <h3>Datos de emisión</h3>
-        <div class="admin-form-group">
-            <label>Fecha:</label>
-            <input type="text" id="admin-fecha" value="${data.emision.fecha}">
-        </div>
-        <div class="admin-form-group">
-            <label>Hora:</label>
-            <input type="text" id="admin-hora" value="${data.emision.hora}">
-        </div>
-        
-        <h3>Pronóstico de la Semana (Días en tabla)</h3>
-        ${['hoy', 'manana'].map(dayKey => {
-            const day = data.pronostico[dayKey];
-            return `
-                <h4>${day.dia}</h4>
-                <div class="admin-form-group">
-                    <label>Temperatura Mínima:</label>
-                    <input type="number" data-path="pronostico.${dayKey}.min_temp" value="${day.min_temp}">
-                </div>
-                <div class="admin-form-group">
-                    <label>Temperatura Máxima:</label>
-                    <input type="number" data-path="pronostico.${dayKey}.max_temp" value="${day.max_temp}">
-                </div>
-                ${['manana', 'tarde', 'noche'].map(timeKey => `
-                    <h5>${timeKey.toUpperCase()}</h5>
-                    <div class="admin-form-group">
-                        <label>Ícono (nombre del archivo):</label>
-                        <input type="text" data-path="pronostico.${dayKey}.${timeKey}.tiempo" value="${day[timeKey].tiempo}">
+                const daySection = document.createElement('div');
+                daySection.className = `grid-day-section ${dayKey}`; // Usamos dayKey para la clase
+                daySection.innerHTML = `
+                    <div class="grid-day-header">
+                        <div class="label">${day.dia}</div>
+                        <span class="time-of-day">MAÑANA</span>
+                        <span class="time-of-day">TARDE</span>
+                        <span class="time-of-day">NOCHE</span>
                     </div>
-                    <div class="admin-form-group">
-                        <label>Temperatura:</label>
-                        <input type="number" data-path="pronostico.${dayKey}.${timeKey}.temp" value="${day[timeKey].temp}">
+                    <div class="grid-forecast-grid">
+                        <div class="grid-forecast-row">
+                            <div class="grid-temp-min-max">
+                                <div class="max-temp"><span class="red-text">${day.max_temp}°c</span></div>
+                                <div class="min-temp"><span class="blue-text">${day.min_temp}°c</span></div>
+                            </div>
+                            <div class="grid-forecast-item">
+                                <div class="grid-forecast-icon">
+                                    <img src="images/${normalizeIconName(day.manana.tiempo)}.png" alt="${day.manana.tiempo}">
+                                </div>
+                                <div class="grid-forecast-temp">${day.manana.temp}°c</div>
+                            </div>
+                            <div class="grid-forecast-item">
+                                <div class="grid-forecast-icon">
+                                    <img src="images/${normalizeIconName(day.tarde.tiempo)}.png" alt="${day.tarde.tiempo}">
+                                </div>
+                                <div class="grid-forecast-temp">${day.tarde.temp}°c</div>
+                            </div>
+                            <div class="grid-forecast-item">
+                                <div class="grid-forecast-icon">
+                                    <img src="images/${normalizeIconName(day.noche.tiempo)}.png" alt="${day.noche.tiempo}">
+                                </div>
+                                <div class="grid-forecast-temp">${day.noche.temp}°c</div>
+                            </div>
+                        </div>
+                        <div class="grid-forecast-row">
+                            <div class="grid-forecast-label">Vientos</div>
+                            <div class="grid-forecast-item">${day.manana.viento}</div>
+                            <div class="grid-forecast-item">${day.tarde.viento}</div>
+                            <div class="grid-forecast-item">${day.noche.viento}</div>
+                        </div>
+                        <div class="grid-forecast-row">
+                            <div class="grid-forecast-label">Tiempo</div>
+                            <div class="grid-forecast-item">${day.manana.tiempo}</div>
+                            <div class="grid-forecast-item">${day.tarde.tiempo}</div>
+                            <div class="grid-forecast-item">${day.noche.tiempo}</div>
+                        </div>
                     </div>
-                    <div class="admin-form-group">
-                        <label>Viento:</label>
-                        <input type="text" data-path="pronostico.${dayKey}.${timeKey}.viento" value="${day[timeKey].viento}">
-                    </div>
-                `).join('')}
-            `;
-        }).join('')}
-        
-        <h3>Pronóstico de la Semana (Días en tarjetas)</h3>
-        <p>La edición de los pronósticos de tarjetas se realiza directamente en la consola de Firestore.</p>
-    `;
-    forecastForm.innerHTML = formHtml;
-}
+                `;
+                container.appendChild(daySection);
+            });
 
-// Lógica para guardar los cambios
-saveButton.addEventListener('click', async () => {
-    const cityId = adminCitySelect.value;
-    const updates = {};
-    const inputs = forecastForm.querySelectorAll('input[data-path]');
-    inputs.forEach(input => {
-        const path = input.getAttribute('data-path');
-        const value = input.type === 'number' ? parseFloat(input.value) : input.value;
-        updates[path] = value;
-    });
-    
-    updates['emision.fecha'] = document.getElementById('admin-fecha').value;
-    updates['emision.hora'] = document.getElementById('admin-hora').value;
+            // Renderizar los días en formato de tarjeta (los días de la colección 'semana')
+            const cardContainer = document.createElement('div');
+            cardContainer.className = 'card-forecast-container';
+            container.appendChild(cardContainer);
 
-    try {
-        await db.collection('ciudades').doc(cityId).update(updates);
-        alert('Cambios guardados con éxito!');
-        // Recargar el pronóstico para mostrar los cambios
-        loadForecast(cityId);
-    } catch (e) {
-        console.error("Error al guardar los cambios:", e);
-        alert('Error al guardar los cambios. Intenta de nuevo.');
-    }
-});
+            // Obtener datos de la colección `semana`
+            db.collection('ciudades').doc(targetElementId).collection('semana').get().then(snapshot => {
+                snapshot.forEach(doc => {
+                    const card = doc.data();
+                    const cardElement = document.createElement('div');
+                    cardElement.className = 'weather-card';
+                    cardElement.innerHTML = `
+                        <div class="day-info">${card.dia}</div>
+                        <div class="date-info">${card.fecha}</div>
+                        <div class="weather-icons-temps">
+                            <div class="day-weather">
+                                <span style="font-size: 4em;">
+                                    <img src="images/${normalizeIconName(card.condicion_cielo_dia)}.png" alt="${card.condicion_cielo_dia}">
+                                </span>
+                                <div class="temp-min-max-icon"><span class="temp-bar">🌡️</span> <span>${card.dia_temp}°c</span></div>
+                            </div>
+                            <div class="night-weather">
+                                <span style="font-size: 4em;">
+                                    <img src="images/${normalizeIconName(card.condicion_cielo_noche)}.png" alt="${card.condicion_cielo_noche}">
+                                </span>
+                                <div class="temp-min-max-icon"><span class="temp-bar">🌡️</span> <span>${card.noche_temp}°c</span></div>
+                            </div>
+                        </div>
+                        <div class="sky-condition">${card.condicion_cielo}</div>
+                        <div class="arrow-down">⬇️</div>
+                        <div class="wind-info">${card.viento}</div>
+                    `;
+                    cardContainer.appendChild(cardElement);
+                });
+            }).catch(e => console.error("Error al cargar la colección semana:", e));
 
-// Manejador del select de ciudades en el panel de admin
-adminCitySelect.addEventListener('change', generateAdminForm);
-    
-// Manejadores de eventos del botón de login y logout
-loginButton.addEventListener('click', () => {
-    const email = prompt("Ingresa tu correo electrónico:");
-    const password = prompt("Ingresa tu contraseña:");
-    if (email && password) {
-        auth.signInWithEmailAndPassword(email, password).catch(error => {
-            alert('Error al iniciar sesión: ' + error.message);
+            const footnote = document.createElement('div');
+            footnote.className = 'footnote';
+            footnote.textContent = '* TEMPERATURA EN ZONA SUBURBANA';
+            container.appendChild(footnote);
+
+            dateEmission.textContent = cityData.emision.fecha;
+            timeEmission.textContent = `Hora de emisión ${cityData.emision.hora}`;
+        }
+
+        // Función para cargar los datos de una ciudad
+        async function loadForecast(cityId) {
+            try {
+                const docRef = db.collection('ciudades').doc(cityId);
+                const doc = await docRef.get();
+                if (doc.exists) {
+                    currentCityData = doc.data();
+                    renderForecast(currentCityData, cityId);
+                } else {
+                    console.log("No existe el documento para la ciudad:", cityId);
+                    document.getElementById(cityId).innerHTML = '<p style="padding: 20px;">Pronóstico no disponible.</p>';
+                }
+            } catch (e) {
+                console.error("Error al cargar el documento:", e);
+                alert('Error al cargar los datos. Intente de nuevo.');
+            }
+        }
+
+        // Lógica de las pestañas
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const targetId = tab.getAttribute('data-city');
+                
+                tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+
+                contents.forEach(c => c.classList.remove('active'));
+                document.getElementById(targetId).classList.add('active');
+
+                cityTitle.textContent = tab.textContent;
+                loadForecast(targetId);
+                
+                // Si el panel de admin está activo, recargar el formulario con la nueva ciudad
+                if (adminPanel.style.display === 'block') {
+                    adminCitySelect.value = targetId;
+                    generateAdminForm();
+                }
+            });
         });
-    }
-});
 
-logoutButton.addEventListener('click', () => {
-    auth.signOut();
-});
+        // Función para generar el formulario de edición
+        async function generateAdminForm() {
+            const cityId = adminCitySelect.value;
+            const docRef = db.collection('ciudades').doc(cityId);
+            const doc = await docRef.get();
+            
+            if (!doc.exists) {
+                forecastForm.innerHTML = `<p style="color: red;">No se encontraron datos para ${cityId}.</p>`;
+                return;
+            }
 
-// *** Carga el pronóstico inicial al cargar la página (Corrección clave) ***
-document.addEventListener('DOMContentLoaded', () => {
-    loadForecast('la-plata');
-});
+            const data = doc.data();
+            let formHtml = `
+                <h3>Datos de Emisión Globales</h3>
+                <div class="admin-form-group">
+                    <label for="admin-fecha">Fecha (Ej: Lunes 11 de Octubre):</label>
+                    <input type="text" id="admin-fecha" value="${data.emision.fecha}">
+                </div>
+                <div class="admin-form-group">
+                    <label for="admin-hora">Hora (Ej: 13:00 hs.):</label>
+                    <input type="text" id="admin-hora" value="${data.emision.hora}">
+                </div>
+                
+                <h3>Pronóstico de la Semana (Días en tabla: Hoy y Mañana)</h3>
+            `;
+            
+            // Días de la tabla (hoy y mañana)
+            ['hoy', 'manana'].forEach(dayKey => {
+                const day = data.pronostico[dayKey];
+                if (!day) return;
+
+                formHtml += `
+                    <h4>${day.dia} - Temperaturas Generales</h4>
+                    <div style="display: flex; gap: 20px;">
+                        <div class="admin-form-group" style="flex: 1;">
+                            <label>Temperatura Mínima:</label>
+                            <input type="number" data-path="pronostico.${dayKey}.min_temp" value="${day.min_temp}">
+                        </div>
+                        <div class="admin-form-group" style="flex: 1;">
+                            <label>Temperatura Máxima:</label>
+                            <input type="number" data-path="pronostico.${dayKey}.max_temp" value="${day.max_temp}">
+                        </div>
+                    </div>
+                `;
+                
+                // Franjas horarias de cada día
+                ['manana', 'tarde', 'noche'].forEach(timeKey => {
+                    formHtml += `
+                        <div style="border: 1px solid #bbdefb; padding: 10px; margin-top: 10px; border-radius: 5px;">
+                            <h5>${timeKey.toUpperCase()}</h5>
+                            <div class="admin-form-group">
+                                <label>Condición del Cielo (Texto, Ej: Despejado):</label>
+                                <input type="text" data-path="pronostico.${dayKey}.${timeKey}.tiempo" value="${day[timeKey].tiempo}" placeholder="Ej: Despejado. Debe coincidir con el nombre de tu archivo PNG (sin espacios ni acentos)">
+                            </div>
+                            <div class="admin-form-group">
+                                <label>Temperatura:</label>
+                                <input type="number" data-path="pronostico.${dayKey}.${timeKey}.temp" value="${day[timeKey].temp}">
+                            </div>
+                            <div class="admin-form-group">
+                                <label>Viento:</label>
+                                <input type="text" data-path="pronostico.${dayKey}.${timeKey}.viento" value="${day[timeKey].viento}">
+                            </div>
+                        </div>
+                    `;
+                });
+            });
+
+            formHtml += `
+                <h3>Pronóstico de la Semana (Días en tarjetas)</h3>
+                <p style="color: red;"><strong>Advertencia:</strong> Para editar los datos de los días de la semana en formato tarjeta, debes editarlos directamente en la subcolección <strong>'semana'</strong> de la ciudad correspondiente en la consola de Firebase Firestore, ya que estos datos suelen ser más complejos y se editan por documento.</p>
+            `;
+            
+            forecastForm.innerHTML = formHtml;
+        }
+
+        // Lógica para guardar los cambios
+        saveButton.addEventListener('click', async () => {
+            const cityId = adminCitySelect.value;
+            const updates = {};
+            const inputs = forecastForm.querySelectorAll('input[data-path]');
+            let isValid = true;
+
+            inputs.forEach(input => {
+                const path = input.getAttribute('data-path');
+                let value = input.value.trim();
+                
+                if (input.type === 'number') {
+                    if (value === '' || isNaN(value)) {
+                        alert(`El campo de temperatura/número en ${path} no puede estar vacío y debe ser un número.`);
+                        isValid = false;
+                        return;
+                    }
+                    value = parseFloat(value);
+                } else if (value === '') {
+                    alert(`El campo de texto en ${path} no puede estar vacío.`);
+                    isValid = false;
+                    return;
+                }
+                
+                updates[path] = value;
+            });
+            
+            if (!isValid) return;
+
+            // Datos de emisión
+            updates['emision.fecha'] = document.getElementById('admin-fecha').value.trim();
+            updates['emision.hora'] = document.getElementById('admin-hora').value.trim();
+            
+            if (updates['emision.fecha'] === '' || updates['emision.hora'] === '') {
+                 alert('Los campos de fecha y hora de emisión no pueden estar vacíos.');
+                 return;
+            }
+
+            try {
+                await db.collection('ciudades').doc(cityId).update(updates);
+                alert('✅ ¡Cambios guardados con éxito!');
+                
+                // Recargar el pronóstico para que los usuarios vean los cambios
+                const activeTab = document.querySelector('.city-tab.active').getAttribute('data-city');
+                if (activeTab === cityId) {
+                    loadForecast(cityId);
+                }
+                // Si no era la pestaña activa, se actualizará al cambiar de pestaña.
+            } catch (e) {
+                console.error("Error al guardar los cambios:", e);
+                alert('❌ Error al guardar los cambios. Revisa la consola para más detalles o verifica tus permisos de Firestore.');
+            }
+        });
+
+        // Manejador del select de ciudades en el panel de admin
+        adminCitySelect.addEventListener('change', generateAdminForm);
+            
+        // Lógica de autenticación
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                // El usuario está logueado
+                loginButton.style.display = 'none';
+                logoutButton.style.display = 'block';
+                adminPanel.style.display = 'block';
+                // Generar el formulario de edición para la ciudad por defecto
+                generateAdminForm(); 
+            } else {
+                // El usuario no está logueado
+                loginButton.style.display = 'block';
+                logoutButton.style.display = 'none';
+                adminPanel.style.display = 'none';
+                forecastForm.innerHTML = '<p>Debes iniciar sesión para editar el pronóstico.</p>';
+            }
+        });
+        
+        // Manejadores de eventos del botón de login y logout
+        loginButton.addEventListener('click', () => {
+            const email = prompt("Ingresa tu correo electrónico:");
+            const password = prompt("Ingresa tu contraseña:");
+            if (email && password) {
+                auth.signInWithEmailAndPassword(email, password)
+                .catch(error => {
+                    alert('Error al iniciar sesión: ' + error.message);
+                });
+            }
+        });
+
+        logoutButton.addEventListener('click', () => {
+            auth.signOut();
+        });
+
+        // *** Carga el pronóstico inicial al cargar la página ***
+        document.addEventListener('DOMContentLoaded', () => {
+            loadForecast('la-plata');
+        });
     </script>
 </body>
 </html>
